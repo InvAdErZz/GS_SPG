@@ -96,6 +96,8 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_program.BindAttributeLocation(VertextAttribute::BITANGENT_ATTRIBUTE_LOCATION, VertextAttribute::BITANGENT_ATTRIBUTE_NAME);
 	m_program.BindAttributeLocation(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION, VertextAttribute::TEXCOORD_ATTRIBUTE_NAME);
 
+	m_program.LinkShaders();
+
 	m_program.FindUniforms({
 		VIEW_PROJECTION_UNIFORM_NAME,
 		COLOR_UNIFORM_NAME,
@@ -130,10 +132,14 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_shadowMapProgram.BindAttributeLocation(VertextAttribute::POSITION_ATTRIBUTE_LOCATION, VertextAttribute::POSITION_ATTRIBUTE_NAME);
 	m_shadowMapProgram.BindAttributeLocation(VertextAttribute::NORMAL_ATTRIBUTE_LOCATION, VertextAttribute::NORMAL_ATTRIBUTE_NAME);
 	m_shadowMapProgram.BindAttributeLocation(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION, VertextAttribute::TEXCOORD_ATTRIBUTE_NAME);
+	m_shadowMapProgram.LinkShaders();
+
+
 	m_shadowMapProgram.FindUniforms({
 		VIEW_PROJECTION_UNIFORM_NAME,
 		MODEL_MATRIX_UNIFORM_NAME,
 	});
+
 
 	if (!m_postProcessProgram.CreateShaders("postprocess.vert", "postprocess.frag"))
 	{
@@ -143,9 +149,13 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_postProcessProgram.BindAttributeLocation(VertextAttribute::NORMAL_ATTRIBUTE_LOCATION, VertextAttribute::NORMAL_ATTRIBUTE_NAME);
 	m_postProcessProgram.BindAttributeLocation(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION, VertextAttribute::TEXCOORD_ATTRIBUTE_NAME);
 
+	m_postProcessProgram.LinkShaders();
+
+
 	m_postProcessProgram.FindUniforms({
 		RENDERED_SCENE_TEXTURE_UNIFORM_NAME,
 	});
+
 
 	for (int i = 0; i < LightCount; ++i)
 	{

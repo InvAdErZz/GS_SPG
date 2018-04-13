@@ -99,6 +99,9 @@ inline std::vector<GLsizei> Texture2DMultisample::FindSupportedSampleSizes(glm::
 	
 	std::vector<GLsizei> result;
 	result.reserve(8);
+
+	glDisable(GL_DEBUG_OUTPUT);
+
 	for (GLsizei i = 1; i < maxSampleSize; ++i)
 	{
 		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, i, GL_RGB, resolution.x, resolution.y, false);
@@ -120,6 +123,8 @@ inline std::vector<GLsizei> Texture2DMultisample::FindSupportedSampleSizes(glm::
 
 		result.push_back(i);
 	}
+	glEnable(GL_DEBUG_OUTPUT);
+
 	ASSERT_GL_ERROR_MACRO();
 	return result;	
 }

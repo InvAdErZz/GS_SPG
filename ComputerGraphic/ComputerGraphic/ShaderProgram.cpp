@@ -85,7 +85,10 @@ bool ShaderProgram::CreateShaders(const char * vertexShaderFileName, const char 
 	ASSERT_GL_ERROR_MACRO();
 	glAttachShader(m_handle, m_fragmentShader.GetHandle());
 	ASSERT_GL_ERROR_MACRO();
-
+	return true;
+}
+bool ShaderProgram::LinkShaders()
+{
 	glLinkProgram(m_handle);
 	ASSERT_GL_ERROR_MACRO();
 
@@ -101,6 +104,8 @@ bool ShaderProgram::CreateShaders(const char * vertexShaderFileName, const char 
 
 	return true;
 }
+
+
 
 void ShaderProgram::PrintProgramInfoLog() const
 {

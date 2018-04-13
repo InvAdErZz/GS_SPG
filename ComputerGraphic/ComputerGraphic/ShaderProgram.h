@@ -21,6 +21,7 @@ public:
 	void UseProgram();
 
 	bool CreateShaders(const char* vertexShaderFileName, const char* fragmentShaderFilename);
+	bool LinkShaders();
 	void PrintProgramInfoLog() const;
 
 	void FindUniforms(const std::vector<std::string>& UniformNames);

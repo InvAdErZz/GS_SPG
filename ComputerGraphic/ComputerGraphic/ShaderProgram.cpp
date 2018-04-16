@@ -3,21 +3,17 @@
 #include "CheckGl.h"
 
 ShaderProgram::ShaderProgram()
-	: m_vertexShader(ShaderType::Vertex)
-	, m_fragmentShader(ShaderType::Fragment)
 {}
 
 ShaderProgram::~ShaderProgram()
 {
-	if (m_vertexShader.GetHandle() != 0)
+	for (Shader& shader : m_shaders)
 	{
-		glDetachShader(m_handle, m_vertexShader.GetHandle());
-		ASSERT_GL_ERROR_MACRO();
-	}
-	if (m_fragmentShader.GetHandle() != 0)
-	{
-		glDetachShader(m_handle, m_fragmentShader.GetHandle());
-		ASSERT_GL_ERROR_MACRO();
+		if (shader.GetHandle() != 0)
+		{
+			glDetachShader(m_handle, shader.GetHandle());
+			ASSERT_GL_ERROR_MACRO();
+		}
 	}
 }
 
@@ -72,21 +68,45 @@ void ShaderProgram::UseProgram()
 
 bool ShaderProgram::CreateShaders(const char * vertexShaderFileName, const char * fragmentShaderFilename)
 {
-	if (! (m_vertexShader.Create(vertexShaderFileName) && m_fragmentShader.Create(fragmentShaderFilename)))
+	if (!CreateProgram())
 	{
-		
-		printf("Shader Creation Failed!");
+		return false;
+	}
+	if (!CreateAndAttachShader(vertexShaderFileName, ShaderType::Vertex))
+	{
+		return false;
+	}
+	if (!CreateAndAttachShader(fragmentShaderFilename, ShaderType::Fragment))
+	{
 		return false;
 	}
 
-	m_handle = glCreateProgram();
+	return true;
+}
 
-	glAttachShader(m_handle, m_vertexShader.GetHandle());
-	ASSERT_GL_ERROR_MACRO();
-	glAttachShader(m_handle, m_fragmentShader.GetHandle());
+bool ShaderProgram::CreateProgram()
+{
+	m_handle = glCreateProgram();
 	ASSERT_GL_ERROR_MACRO();
 	return true;
 }
+
+bool ShaderProgram::CreateAndAttachShader(const char* shaderFileName, ShaderType type)
+{
+	assert(Resource::IsValid());
+	m_shaders.push_back(Shader(type));
+	Shader& currentShader = m_shaders.back();
+	if (!currentShader.Create(shaderFileName))
+	{
+		printf("Shader Creation Failed!");
+		m_shaders.pop_back();
+		return false;
+	}
+	glAttachShader(m_handle, currentShader.GetHandle());
+	ASSERT_GL_ERROR_MACRO();
+	return true;
+}
+
 bool ShaderProgram::LinkShaders()
 {
 	glLinkProgram(m_handle);

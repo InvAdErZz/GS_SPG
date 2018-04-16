@@ -5,6 +5,7 @@
 #include "glew.h"
 #include <unordered_map>
 #include <string.h>
+#include <vector>
 
 class ShaderProgram : public Resource<ShaderProgram>
 {
@@ -21,6 +22,8 @@ public:
 	void UseProgram();
 
 	bool CreateShaders(const char* vertexShaderFileName, const char* fragmentShaderFilename);
+	bool CreateProgram();
+	bool CreateAndAttachShader(const char* shaderFileName, ShaderType type);
 	bool LinkShaders();
 	void PrintProgramInfoLog() const;
 
@@ -36,8 +39,7 @@ public:
 	void SetSamplerTextureUnit(GLint textureUnit, const std::string UniformName);
 
 private:
-	Shader m_vertexShader;
-	Shader m_fragmentShader;
+	std::vector<Shader> m_shaders;
 
 	std::unordered_map<std::string, GLuint> m_uniformLocations;
 };

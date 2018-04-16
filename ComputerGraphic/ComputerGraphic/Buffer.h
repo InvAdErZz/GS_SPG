@@ -24,6 +24,12 @@ public:
 	template<class DataType>
 	void UploadBufferData(const std::vector<DataType>& data);
 
+	template<class DataType, int arraySize>
+	void UploadBufferData(DataType(&data)[arraySize]);
+
+	void AllocateBufferData(GLsizeiptr size, GLenum usage);
+
+
 	void FreeResource();
 };
 
@@ -80,6 +86,24 @@ void Buffer<TYPE>::UploadBufferData(const std::vector<DataType>& data)
 {
 	assert(IsBound());
 	glBufferData(BUFFER_TARGET, sizeof(DataType) * data.size(), data.data(), GL_STATIC_DRAW);
+	ASSERT_GL_ERROR_MACRO();
+}
+
+template<BufferType TYPE>
+template<class DataType, int arraySize>
+void Buffer<TYPE>::UploadBufferData(DataType(&data)[arraySize])
+{
+	assert(IsBound());
+	glBufferData(BUFFER_TARGET, sizeof(DataType) * arraySize, data, GL_STATIC_DRAW);
+	ASSERT_GL_ERROR_MACRO();
+}
+
+
+template<BufferType TYPE>
+void Buffer<TYPE>::AllocateBufferData(GLsizeiptr size, GLenum usage)
+{
+	assert(IsBound());
+	glBufferData(BUFFER_TARGET, size, nullptr, usage);
 	ASSERT_GL_ERROR_MACRO();
 }
 

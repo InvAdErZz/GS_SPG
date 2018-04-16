@@ -8,6 +8,7 @@ enum class ShaderType
 {
 	Vertex,
 	Fragment,
+	Geometry
 };
 
 constexpr GLenum GetShaderType(ShaderType shaderType)
@@ -18,6 +19,8 @@ constexpr GLenum GetShaderType(ShaderType shaderType)
 		return GL_VERTEX_SHADER;
 	case ShaderType::Fragment:
 		return GL_FRAGMENT_SHADER;
+	case ShaderType::Geometry:
+		return GL_GEOMETRY_SHADER;
 	default:
 		assert(false);
 		return std::numeric_limits<GLenum>::max();

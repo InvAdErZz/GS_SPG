@@ -39,6 +39,7 @@ bool ShaderProgram::IsInUse()
 
 bool ShaderProgram::IsValid() const
 {
+	Resource::IsValid();
 	glValidateProgram(m_handle);
 	ASSERT_GL_ERROR_MACRO();
 	GLint validateStatus;
@@ -239,4 +240,11 @@ void ShaderProgram::SetSamplerTextureUnit(GLint textureUnit, const std::string U
 	GLuint uniformLocation = foundItem->second;
 	glUniform1i(uniformLocation, textureUnit);
 	ASSERT_GL_ERROR_MACRO();
+}
+
+void ShaderProgram::FeedBackVariings()
+{
+	Resource::IsValid();
+	const GLchar* feedbackVaryings[] = { "outValue" };
+	glTransformFeedbackVaryings(GetHandle(), 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
 }

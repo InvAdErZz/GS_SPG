@@ -16,7 +16,16 @@ namespace
 	);
 
 	constexpr glm::ivec3 Texture3dDimensions(96,96,256);
-	constexpr float Texture3dSliceHeight = 0.1f;
+	constexpr glm::ivec3 Texture3dDimensionsMinOne(Texture3dDimensions.x - 1, Texture3dDimensions.y - 1, Texture3dDimensions.z-1);
+	constexpr glm::vec3 Inversed3dDimensions(1.f / Texture3dDimensions.x, 1.f / Texture3dDimensions.y, 1.f / Texture3dDimensions.z);
+	constexpr glm::vec3 Inversed3dDimensionsMinusOne(1.f / Texture3dDimensionsMinOne.x, 1.f / Texture3dDimensionsMinOne.y, 1.f / Texture3dDimensionsMinOne.z);
+
+
+
+
+	constexpr int Texture3dNumSamples = Texture3dDimensions.x * Texture3dDimensions.y * Texture3dDimensions.z;
+	constexpr float Texture3dSliceHeight = 0.5f;
+	constexpr float Texture3dDistanceBetweenPoints = 0.5f;
 
 	const glm::ivec2 shadowDimensions(1024, 1024);
 
@@ -28,6 +37,7 @@ namespace
 	const std::string CAMERA_POS_UNIFORM_NAME("cameraPos");
 	const std::string NORMAL_MAP_UNIFORM_NAME("normalMap");
 	const std::string ROUGHNESS_UNIFORM_NAME("roughness");
+	const std::string WS_VOXEL_SIZE_UNIFORM_NAME("worldSpaceVoxelSize");
 
 	const std::string HIGHT_UNIFORM_NAME("height");
 
@@ -160,6 +170,14 @@ void Scene::Init(const glm::ivec2& ViewPort)
 
 	m_texture3dProgramm.FindUniform(HIGHT_UNIFORM_NAME);
 
+	m_marchingCubesShader.CreateProgram();
+	m_marchingCubesShader.CreateAndAttachShader("mc.vert", ShaderType::Vertex);
+	m_marchingCubesShader.CreateAndAttachShader("mc.geo", ShaderType::Geometry);
+	m_marchingCubesShader.FeedBackVariings();
+	m_marchingCubesShader.BindAttributeLocation(0, "in_Position");
+	m_marchingCubesShader.LinkShaders();
+	m_marchingCubesShader.FindUniform(WS_VOXEL_SIZE_UNIFORM_NAME);
+
 
 	if (!m_postProcessProgram.CreateShaders("postprocess.vert", "postprocess.frag"))
 	{
@@ -285,9 +303,42 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_densityMap.SetClampToEdge();
 	m_densityMap.Unbind();
 
-	
 
-	DensityPass();	
+
+	// create dummy attributeBuffer
+	{
+		std::vector<glm::vec3> dummyPoints;
+		for (int x = 1; x <= Texture3dDimensionsMinOne.x; ++x)
+		{
+			for (int y = 1; y <= Texture3dDimensionsMinOne.y; ++y)
+			{
+				for (int z = 1; z <= Texture3dDimensionsMinOne.z; ++z)
+				{
+					dummyPoints.push_back(glm::vec3(
+						x * Inversed3dDimensions.x,
+						y * Inversed3dDimensions.y,
+						z * Inversed3dDimensions.z));
+				}
+			}
+		}
+
+		m_marchingCubesVao.Create();
+		m_marchingCubesVao.Bind();
+		m_marchingCubesVao.EnableAttribute(0);
+
+		m_dummyVertices.Create();
+		m_dummyVertices.Bind();
+		m_dummyVertices.UploadBufferData(dummyPoints);
+		m_dummyVertices.SetVertexAttributePtr(0, glm::vec3::length(), GL_FLOAT, sizeof(glm::vec3), 0);
+		m_dummyVertices.Unbind();
+
+		m_marchingCubesVao.Unbind();
+	}
+
+	m_mcLookupBuffer.WriteLookupTablesToGpu();
+
+	DensityPass();
+	GenerateRockFromDensity();
 }
 
 void Scene::Update(float deltaTime, const InputManager& inputManager)
@@ -520,6 +571,42 @@ void Scene::DensityPass()
 	}
 	m_densityFramebuffer.Unbind();
 
+	m_rockVertices.Create();
+	m_rockVertices.Bind();
+	m_rockVertices.AllocateBufferData(Texture3dNumSamples * sizeof(glm::vec3), GL_STATIC_READ);
+	m_rockVertices.Unbind();
+
+}
+
+void Scene::GenerateRockFromDensity()
+{
+	glEnable(GL_RASTERIZER_DISCARD);
+	{
+		m_marchingCubesShader.UseProgram();
+		m_marchingCubesShader.SetFloatUniform(Texture3dSliceHeight, WS_VOXEL_SIZE_UNIFORM_NAME);
+		m_mcLookupBuffer.UpdateUniforms(m_marchingCubesShader);
+
+		m_marchingCubesVao.Bind();
+
+		glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_rockVertices.GetHandle());
+
+		GLuint query;
+		glGenQueries(1, &query);
+		glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
+
+		glBeginTransformFeedback(GL_TRIANGLES);
+		
+		glDrawArrays(GL_POINTS, 0, Texture3dNumSamples);
+
+		glEndTransformFeedback();
+		glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+	
+		glGetQueryObjectuiv(query, GL_QUERY_RESULT, &m_numRockTriangles);
+		printf("%u primitives written!\n\n", m_numRockTriangles);
+
+		m_marchingCubesVao.Unbind();
+	}
+	glDisable(GL_RASTERIZER_DISCARD);
 }
 
 void Scene::ShadowMapPass(int LightIndex)

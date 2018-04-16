@@ -15,6 +15,7 @@
 #include "RenderBuffer.h"
 #include "Texture2DMutlisample.h"
 #include "Texture3d.h"
+#include "LookupBuffer.h"
 
 enum class PathFollower
 {
@@ -40,6 +41,7 @@ private:
 	void UpdatePathFollowing(float deltaTime, const InputManager& inputManager);
 
 	void DensityPass();
+	void GenerateRockFromDensity();
 	void ShadowMapPass(int LightIndex);
 	void RenderScenePass();
 	void PostProcessPass();
@@ -54,6 +56,14 @@ private:
 	ShaderProgram m_shadowMapProgram;
 	ShaderProgram m_postProcessProgram;
 	ShaderProgram m_texture3dProgramm;
+
+	ShaderProgram m_marchingCubesShader;
+
+
+	VertexArray m_marchingCubesVao;
+	AttributeBuffer m_dummyVertices;
+	AttributeBuffer m_rockVertices;
+	GLuint m_numRockTriangles;
 	
 	FrameBuffer m_framebuffer;
 	FrameBuffer m_msaaFrameBuffer;
@@ -61,6 +71,8 @@ private:
 
 	Texture2DMultisample m_msaaColorTexture;
 	Texture2DMultisample m_msaaDepthTexture;
+
+	LookupBuffer m_mcLookupBuffer;
 
 	Texture3d m_densityMap;
 

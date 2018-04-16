@@ -37,6 +37,7 @@ public:
 	void SetIntUniform(int value, const std::string & UniformName);
 	void SetFloatUniform(float value, const std::string& UniformName);
 	void SetSamplerTextureUnit(GLint textureUnit, const std::string UniformName);
+	void FeedBackVariings();
 
 private:
 	std::vector<Shader> m_shaders;

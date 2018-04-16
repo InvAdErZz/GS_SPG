@@ -167,6 +167,7 @@
     <ClInclude Include="DynamicLight.h" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="LookupBuffer.h" />
     <ClInclude Include="RenderBuffer.h" />
     <ClInclude Include="Texture2DMutlisample.h" />
     <ClInclude Include="Texture3d.h" />
@@ -200,6 +201,7 @@
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Key.cpp" />
+    <ClCompile Include="LookupBuffer.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshIndexed.cpp" />
     <ClCompile Include="MeshData.cpp" />

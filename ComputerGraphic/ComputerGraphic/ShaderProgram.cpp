@@ -187,6 +187,17 @@ void ShaderProgram::SetBoolUniform(bool value, const std::string & UniformName)
 	ASSERT_GL_ERROR_MACRO();
 }
 
+void ShaderProgram::SetIntUniform(int value, const std::string & UniformName)
+{
+	assert(IsInUse());
+	auto foundItem = m_uniformLocations.find(UniformName);
+	assert(foundItem != m_uniformLocations.end());
+
+	GLuint uniformLocation = foundItem->second;
+	glUniform1i(uniformLocation, value);
+	ASSERT_GL_ERROR_MACRO();
+}
+
 void ShaderProgram::SetFloatUniform(float value, const std::string& UniformName)
 {
 	assert(IsInUse());

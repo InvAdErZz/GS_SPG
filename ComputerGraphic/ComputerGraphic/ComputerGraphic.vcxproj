@@ -169,6 +169,7 @@
     <ClInclude Include="Image.h" />
     <ClInclude Include="RenderBuffer.h" />
     <ClInclude Include="Texture2DMutlisample.h" />
+    <ClInclude Include="Texture3d.h" />
     <ClInclude Include="TypeToGLEnum.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Key.h" />

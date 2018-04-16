@@ -15,6 +15,9 @@ namespace
 		0.5, 0.5, 0.5, 1.0
 	);
 
+	constexpr glm::ivec3 Texture3dDimensions(96,96,256);
+	constexpr float Texture3dSliceHeight = 0.1f;
+
 	const glm::ivec2 shadowDimensions(1024, 1024);
 
 	const std::string VIEW_PROJECTION_UNIFORM_NAME("viewProjection");
@@ -25,6 +28,9 @@ namespace
 	const std::string CAMERA_POS_UNIFORM_NAME("cameraPos");
 	const std::string NORMAL_MAP_UNIFORM_NAME("normalMap");
 	const std::string ROUGHNESS_UNIFORM_NAME("roughness");
+
+	const std::string HIGHT_UNIFORM_NAME("height");
+
 
 
 	const std::array<std::string, Scene::LightCount> SHADOW_MAP_UNIFORM_NAME_ARRAY = []()
@@ -139,6 +145,20 @@ void Scene::Init(const glm::ivec2& ViewPort)
 		VIEW_PROJECTION_UNIFORM_NAME,
 		MODEL_MATRIX_UNIFORM_NAME,
 	});
+
+
+	
+	if (!m_texture3dProgramm.CreateShaders("texture3d.vert", "texture3d.frag"))
+	{
+		assert(false);
+	}
+
+	m_texture3dProgramm.BindAttributeLocation(VertextAttribute::POSITION_ATTRIBUTE_LOCATION, VertextAttribute::POSITION_ATTRIBUTE_NAME);
+	m_texture3dProgramm.BindAttributeLocation(VertextAttribute::NORMAL_ATTRIBUTE_LOCATION, VertextAttribute::NORMAL_ATTRIBUTE_NAME);
+	m_texture3dProgramm.BindAttributeLocation(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION, VertextAttribute::TEXCOORD_ATTRIBUTE_NAME);
+	m_texture3dProgramm.LinkShaders();
+
+	m_texture3dProgramm.FindUniform(HIGHT_UNIFORM_NAME);
 
 
 	if (!m_postProcessProgram.CreateShaders("postprocess.vert", "postprocess.frag"))
@@ -257,6 +277,17 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	}
 
 	m_allowedSampleSizes = Texture2DMultisample::FindSupportedSampleSizes(m_viewPort);
+
+	m_densityMap.Create();
+	m_densityMap.Bind();
+	m_densityMap.TextureImage(0, GL_R32F, Texture3dDimensions.x, Texture3dDimensions.y, Texture3dDimensions.z, GL_RED, GL_FLOAT, nullptr);
+	m_densityMap.SetNearestNeighbourFiltering();
+	m_densityMap.SetClampToEdge();
+	m_densityMap.Unbind();
+
+	
+
+	DensityPass();	
 }
 
 void Scene::Update(float deltaTime, const InputManager& inputManager)
@@ -463,6 +494,32 @@ void Scene::SetMsaaSamplingNumber(GLsizei samples, bool fixedSampleLocations)
 	assert(m_msaaColorTexture.IsValid());
 	assert(m_msaaDepthTexture.IsValid());
 	assert(m_msaaFrameBuffer.IsValid());
+}
+
+void Scene::DensityPass()
+{
+	m_densityFramebuffer.Create();
+	m_densityFramebuffer.Bind();
+
+	glViewport(0, 0, Texture3dDimensions.x, Texture3dDimensions.y);
+
+	m_texture3dProgramm.UseProgram();
+	m_texture3dProgramm.IsValid();
+	
+	for (int layer = 0; layer < Texture3dDimensions.z; ++layer)
+	{
+		m_densityFramebuffer.BindTexture3D(GL_COLOR_ATTACHMENT0, m_densityMap.GetHandle(), 0, layer);
+	
+		m_texture3dProgramm.SetFloatUniform(layer * Texture3dSliceHeight, HIGHT_UNIFORM_NAME);
+		const GLenum framBufferStatus2 = m_densityFramebuffer.GetFrameBufferStatus();
+		assert(framBufferStatus2 == GL_FRAMEBUFFER_COMPLETE);
+		glClear(GL_COLOR_BUFFER_BIT);
+		ASSERT_GL_ERROR_MACRO();
+
+		m_screenTriangleMesh.Render();
+	}
+	m_densityFramebuffer.Unbind();
+
 }
 
 void Scene::ShadowMapPass(int LightIndex)

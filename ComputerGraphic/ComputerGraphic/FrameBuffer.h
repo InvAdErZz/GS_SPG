@@ -24,6 +24,7 @@ public:
 
 	void FreeResource();
 	void BindTexture(GLenum attachment, GLuint textureHandle, GLint mipMapLevel);
+	void BindTexture3D(GLenum attachment, GLuint textureHandle, GLint mipMapLevel, GLint layer);
 	void BindMultisampleTexture(GLenum attachment, GLuint textureHandle);
 	void BindRenderbuffer(GLenum attachment, GLuint renderbufferHandle);
 	void SetDrawBuffers(GLenum buffer);
@@ -46,6 +47,14 @@ inline void FrameBuffer::BindTexture(GLenum attachment, GLuint textureHandle, GL
 {
 	assert(IsBound());
 	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, textureHandle, mipMapLevel);
+	ASSERT_GL_ERROR_MACRO();
+}
+
+
+inline void FrameBuffer::BindTexture3D(GLenum attachment, GLuint textureHandle, GLint mipMapLevel, GLint layer)
+{
+	assert(IsBound());
+	glFramebufferTexture3D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_3D, textureHandle, mipMapLevel,layer);
 	ASSERT_GL_ERROR_MACRO();
 }
 

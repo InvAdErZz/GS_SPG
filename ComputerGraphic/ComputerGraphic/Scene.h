@@ -14,6 +14,7 @@
 #include <array>
 #include "RenderBuffer.h"
 #include "Texture2DMutlisample.h"
+#include "Texture3d.h"
 
 enum class PathFollower
 {
@@ -38,6 +39,7 @@ private:
 	void UpdateFreeMovement(float deltaTime, const InputManager& inputManager);
 	void UpdatePathFollowing(float deltaTime, const InputManager& inputManager);
 
+	void DensityPass();
 	void ShadowMapPass(int LightIndex);
 	void RenderScenePass();
 	void PostProcessPass();
@@ -51,12 +53,16 @@ private:
 	ShaderProgram m_program;
 	ShaderProgram m_shadowMapProgram;
 	ShaderProgram m_postProcessProgram;
+	ShaderProgram m_texture3dProgramm;
 	
 	FrameBuffer m_framebuffer;
 	FrameBuffer m_msaaFrameBuffer;
+	FrameBuffer m_densityFramebuffer;
 
 	Texture2DMultisample m_msaaColorTexture;
 	Texture2DMultisample m_msaaDepthTexture;
+
+	Texture3d m_densityMap;
 
 	Texture m_colorTexture;
 	Texture m_depthTexture;

@@ -40,6 +40,8 @@ namespace
 	const std::string WS_VOXEL_SIZE_UNIFORM_NAME("worldSpaceVoxelSize");
 
 	const std::string HIGHT_UNIFORM_NAME("height");
+	const std::string DENSITY_TEXTURE_UNIFORM_NAME("densityTex");
+
 
 
 
@@ -168,7 +170,9 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_texture3dProgramm.BindAttributeLocation(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION, VertextAttribute::TEXCOORD_ATTRIBUTE_NAME);
 	m_texture3dProgramm.LinkShaders();
 
-	m_texture3dProgramm.FindUniform(HIGHT_UNIFORM_NAME);
+	m_texture3dProgramm.FindUniforms({
+		HIGHT_UNIFORM_NAME
+		});
 
 	m_marchingCubesShader.CreateProgram();
 	m_marchingCubesShader.CreateAndAttachShader("mc.vert", ShaderType::Vertex);
@@ -176,7 +180,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_marchingCubesShader.FeedBackVariings();
 	m_marchingCubesShader.BindAttributeLocation(0, "in_Position");
 	m_marchingCubesShader.LinkShaders();
-	m_marchingCubesShader.FindUniform(WS_VOXEL_SIZE_UNIFORM_NAME);
+	m_marchingCubesShader.FindUniforms({ WS_VOXEL_SIZE_UNIFORM_NAME,DENSITY_TEXTURE_UNIFORM_NAME });
 
 
 	if (!m_postProcessProgram.CreateShaders("postprocess.vert", "postprocess.frag"))
@@ -569,26 +573,32 @@ void Scene::DensityPass()
 
 		m_screenTriangleMesh.Render();
 	}
-	m_densityFramebuffer.Unbind();
 
 	m_rockVertices.Create();
 	m_rockVertices.Bind();
 	m_rockVertices.AllocateBufferData(Texture3dNumSamples * sizeof(glm::vec3), GL_STATIC_READ);
 	m_rockVertices.Unbind();
+	m_densityFramebuffer.Unbind();
+
 
 }
 
 void Scene::GenerateRockFromDensity()
 {
+
 	glEnable(GL_RASTERIZER_DISCARD);
 	{
 		m_marchingCubesShader.UseProgram();
 		m_marchingCubesShader.SetFloatUniform(Texture3dSliceHeight, WS_VOXEL_SIZE_UNIFORM_NAME);
+
 		m_mcLookupBuffer.UpdateUniforms(m_marchingCubesShader);
 
 		m_marchingCubesVao.Bind();
 
 		glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_rockVertices.GetHandle());
+
+		m_marchingCubesShader.SetSamplerTextureUnit(0, DENSITY_TEXTURE_UNIFORM_NAME);
+		m_densityMap.BindToTextureUnit(0);
 
 		GLuint query;
 		glGenQueries(1, &query);
@@ -596,6 +606,7 @@ void Scene::GenerateRockFromDensity()
 
 		glBeginTransformFeedback(GL_TRIANGLES);
 		
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDrawArrays(GL_POINTS, 0, Texture3dNumSamples);
 
 		glEndTransformFeedback();
@@ -607,6 +618,17 @@ void Scene::GenerateRockFromDensity()
 		m_marchingCubesVao.Unbind();
 	}
 	glDisable(GL_RASTERIZER_DISCARD);
+	glFlush();
+
+	GLfloat*  feedback=  new GLfloat[m_numRockTriangles];
+	glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(float) * m_numRockTriangles, feedback);
+	for (int i = 0; i <m_numRockTriangles; ++i)
+	{
+		printf("%f ", feedback[i]);
+	}
+	delete[] feedback;
+
+
 }
 
 void Scene::ShadowMapPass(int LightIndex)

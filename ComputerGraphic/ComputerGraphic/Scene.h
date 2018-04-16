@@ -68,6 +68,8 @@ private:
 	FrameBuffer m_framebuffer;
 	FrameBuffer m_msaaFrameBuffer;
 	FrameBuffer m_densityFramebuffer;
+	FrameBuffer m_mcFramebuffer;
+
 
 	Texture2DMultisample m_msaaColorTexture;
 	Texture2DMultisample m_msaaDepthTexture;

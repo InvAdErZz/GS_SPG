@@ -2,6 +2,8 @@
 
 layout(points) in;
 layout(triangle_strip, max_vertices = 15) out;
+uniform sampler3D densityTex;
+
 
 struct CellTriangles
 {
@@ -48,6 +50,20 @@ vec3 VertexInterp(float isolevel,vec3 p1,vec3 p2, float density1, float density2
 
 void main()
 {
+	{
+		outValue = vec3(geo_in[0].sampleDensity[0],geo_in[0].sampleDensity[1],geo_in[0].sampleDensity[2]);
+		EmitVertex();
+		
+		outValue = vec3(geo_in[0].sampleDensity[3],geo_in[0].sampleDensity[4],geo_in[0].sampleDensity[5]);
+		EmitVertex();
+		
+		outValue = vec3(geo_in[0].sampleDensity[6],geo_in[0].sampleDensity[7],geo_in[0].sampleDensity[0]);
+		EmitVertex();
+		
+		EndPrimitive();
+	}
+
+
 	vec3 verticesOnEdge[12];
 	int isoLevel = 0;
 	

@@ -304,7 +304,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_densityMap.Bind();
 	m_densityMap.TextureImage(0, GL_R32F, Texture3dDimensions.x, Texture3dDimensions.y, Texture3dDimensions.z, GL_RED, GL_FLOAT, nullptr);
 	m_densityMap.SetNearestNeighbourFiltering();
-	m_densityMap.SetClampToEdge();
+	//m_densityMap.SetClampToEdge();
 	m_densityMap.Unbind();
 
 

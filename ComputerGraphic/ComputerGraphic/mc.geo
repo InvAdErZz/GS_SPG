@@ -21,12 +21,13 @@ layout (shared, std140) uniform mc_triTable
 };
 
 
-out VS_OUT
+in VS_OUT
 {
-   uint mc_case;
-   vec3[8] samplePositions;
-   float[8] sampleDensity;
+	uint mc_case;
+   vec3 samplePositions[8];
+   float sampleDensity[8];
 } geo_in[];
+
 
 out vec3 outValue;
 
@@ -51,16 +52,29 @@ vec3 VertexInterp(float isolevel,vec3 p1,vec3 p2, float density1, float density2
 void main()
 {
 	{
-		outValue = vec3(geo_in[0].sampleDensity[0],geo_in[0].sampleDensity[1],geo_in[0].sampleDensity[2]);
-		EmitVertex();
-		
+	#if 0
 		outValue = vec3(geo_in[0].sampleDensity[3],geo_in[0].sampleDensity[4],geo_in[0].sampleDensity[5]);
 		EmitVertex();
+	
+		outValue = vec3(geo_in[0].sampleDensity[0],geo_in[0].sampleDensity[1],geo_in[0].sampleDensity[2]);
+		EmitVertex();		
 		
 		outValue = vec3(geo_in[0].sampleDensity[6],geo_in[0].sampleDensity[7],geo_in[0].sampleDensity[0]);
 		EmitVertex();
 		
 		EndPrimitive();
+		#else
+		outValue = vec3(geo_in[0].samplePositions[0].xyz);
+		EmitVertex();
+	
+		outValue = vec3(geo_in[0].samplePositions[1].xyz);
+		EmitVertex();		
+		
+		outValue = vec3(geo_in[0].samplePositions[2].xyz);
+		EmitVertex();
+		
+		EndPrimitive();
+		#endif
 	}
 
 

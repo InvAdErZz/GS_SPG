@@ -29,14 +29,14 @@ void main(void) {
 	vs_out.samplePositions[7] =  textureSpace + step.xxy;	
 	
 	#if 1	
-	vs_out.sampleDensity[0] =  (densityTex, vs_out.samplePositions[0]).r;
-	vs_out.sampleDensity[1] =  (densityTex, vs_out.samplePositions[1]).r;
-	vs_out.sampleDensity[2] =  (densityTex, vs_out.samplePositions[2]).r;
-	vs_out.sampleDensity[3] =  (densityTex, vs_out.samplePositions[3]).r;	
-	vs_out.sampleDensity[4] =  (densityTex, vs_out.samplePositions[4]).r;
-	vs_out.sampleDensity[5] =  (densityTex, vs_out.samplePositions[5]).r;
-	vs_out.sampleDensity[6] =  (densityTex, vs_out.samplePositions[6]).r;
-	vs_out.sampleDensity[7] =  (densityTex, vs_out.samplePositions[7]).r;	
+	vs_out.sampleDensity[0] =  texture(densityTex, vs_out.samplePositions[0]).r;
+	vs_out.sampleDensity[1] =  texture(densityTex, vs_out.samplePositions[1]).r;
+	vs_out.sampleDensity[2] =  texture(densityTex, vs_out.samplePositions[2]).r;
+	vs_out.sampleDensity[3] =  texture(densityTex, vs_out.samplePositions[3]).r;	
+	vs_out.sampleDensity[4] =  texture(densityTex, vs_out.samplePositions[4]).r;
+	vs_out.sampleDensity[5] =  texture(densityTex, vs_out.samplePositions[5]).r;
+	vs_out.sampleDensity[6] =  texture(densityTex, vs_out.samplePositions[6]).r;
+	vs_out.sampleDensity[7] =  texture(densityTex, vs_out.samplePositions[7]).r;	
 	#else
 	vs_out.sampleDensity[0] =  1.f;
 	vs_out.sampleDensity[1] =  2.f;

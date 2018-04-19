@@ -52,7 +52,7 @@ vec3 VertexInterp(float isolevel,vec3 p1,vec3 p2, float density1, float density2
 void main()
 {
 	{
-	#if 0
+	#if 1
 		outValue = vec3(geo_in[0].sampleDensity[3],geo_in[0].sampleDensity[4],geo_in[0].sampleDensity[5]);
 		EmitVertex();
 	
@@ -63,7 +63,7 @@ void main()
 		EmitVertex();
 		
 		EndPrimitive();
-		#else
+	#else
 		outValue = vec3(geo_in[0].samplePositions[0].xyz);
 		EmitVertex();
 	
@@ -74,7 +74,7 @@ void main()
 		EmitVertex();
 		
 		EndPrimitive();
-		#endif
+	#endif
 	}
 
 

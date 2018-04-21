@@ -6,7 +6,7 @@
 #include <string>
 #include "Image.h"
 
-namespace 
+namespace
 {
 	const glm::mat4 biasMatrix(
 		0.5, 0.0, 0.0, 0.0,
@@ -14,15 +14,6 @@ namespace
 		0.0, 0.0, 0.5, 0.0,
 		0.5, 0.5, 0.5, 1.0
 	);
-
-	constexpr glm::ivec3 Texture3dDimensions(96,96,256);
-	constexpr glm::ivec3 Texture3dDimensionsMinOne(Texture3dDimensions.x - 1, Texture3dDimensions.y - 1, Texture3dDimensions.z-1);
-	constexpr glm::vec3 Inversed3dDimensions(1.f / Texture3dDimensions.x, 1.f / Texture3dDimensions.y, 1.f / Texture3dDimensions.z);
-	constexpr glm::vec3 Inversed3dDimensionsMinusOne(1.f / Texture3dDimensionsMinOne.x, 1.f / Texture3dDimensionsMinOne.y, 1.f / Texture3dDimensionsMinOne.z);
-
-	constexpr int Texture3dNumSamples = Texture3dDimensions.x * Texture3dDimensions.y * Texture3dDimensions.z;
-	constexpr float Texture3dSliceHeight = 0.5f;
-	constexpr float Texture3dDistanceBetweenPoints = 0.5f;
 
 	const glm::ivec2 shadowDimensions(1024, 1024);
 
@@ -34,19 +25,13 @@ namespace
 	const std::string CAMERA_POS_UNIFORM_NAME("cameraPos");
 	const std::string NORMAL_MAP_UNIFORM_NAME("normalMap");
 	const std::string ROUGHNESS_UNIFORM_NAME("roughness");
-	const std::string WS_VOXEL_SIZE_UNIFORM_NAME("worldSpaceVoxelSize");
-
-	const std::string HIGHT_UNIFORM_NAME("height");
-	const std::string DENSITY_TEXTURE_UNIFORM_NAME("densityTex");
-
-
 
 
 	const std::array<std::string, Scene::LightCount> SHADOW_MAP_UNIFORM_NAME_ARRAY = []()
 	{
 		std::array<std::string, Scene::LightCount> result;
 		for (size_t i = 0; i < result.size(); ++i)
-		{		
+		{
 			result[i] = std::string("shadowmap[") + std::to_string(i) + std::string("]");
 		}
 		return result;
@@ -88,7 +73,7 @@ namespace
 
 	const char* CUBE_MESH_PATH = "../../Models/cube.obj";
 
-	const std::array<const char*,3> NormalMapPath =
+	const std::array<const char*, 3> NormalMapPath =
 	{
 		"../../NormalMaps/norm1.jpg",
 		"../../NormalMaps/norm2.jpg",
@@ -121,7 +106,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 		CAMERA_POS_UNIFORM_NAME,
 		NORMAL_MAP_UNIFORM_NAME,
 		ROUGHNESS_UNIFORM_NAME
-	});
+		});
 
 	for (int i = 0; i < LightCount; ++i)
 	{
@@ -130,7 +115,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 			LIGHT_POS_UNIFORM_NAME_ARRAY[i],
 			LIGHT_VIEW_PROJECTION_MATRIX_NAME_ARRAY[i],
 			IS_LIGHT_ACTIVE_UNFORM_NAME_ARRAY[i]
-		});
+			});
 	}
 	m_program.UseProgram();
 	for (int i = 0; i < LightCount; ++i)
@@ -153,48 +138,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_shadowMapProgram.FindUniforms({
 		VIEW_PROJECTION_UNIFORM_NAME,
 		MODEL_MATRIX_UNIFORM_NAME,
-	});
-
-
-	
-	if (!m_texture3dProgramm.CreateShaders("texture3d.vert", "texture3d.frag"))
-	{
-		assert(false);
-	}
-
-	m_texture3dProgramm.BindAttributeLocation(VertextAttribute::POSITION_ATTRIBUTE_LOCATION, VertextAttribute::POSITION_ATTRIBUTE_NAME);
-	m_texture3dProgramm.BindAttributeLocation(VertextAttribute::NORMAL_ATTRIBUTE_LOCATION, VertextAttribute::NORMAL_ATTRIBUTE_NAME);
-	m_texture3dProgramm.BindAttributeLocation(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION, VertextAttribute::TEXCOORD_ATTRIBUTE_NAME);
-	m_texture3dProgramm.LinkShaders();
-
-	m_texture3dProgramm.FindUniforms({
-		HIGHT_UNIFORM_NAME
 		});
-
-
-
-	if (!m_rockShaderProgramm.CreateShaders("rock.vert", "rock.frag"))
-	{
-		assert(false);
-	}
-
-	m_rockShaderProgramm.BindAttributeLocation(VertextAttribute::POSITION_ATTRIBUTE_LOCATION, VertextAttribute::POSITION_ATTRIBUTE_NAME);
-	m_rockShaderProgramm.BindAttributeLocation(VertextAttribute::NORMAL_ATTRIBUTE_LOCATION, VertextAttribute::NORMAL_ATTRIBUTE_NAME);
-	m_rockShaderProgramm.BindAttributeLocation(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION, VertextAttribute::TEXCOORD_ATTRIBUTE_NAME);
-	m_rockShaderProgramm.LinkShaders();
-
-	m_rockShaderProgramm.FindUniforms({
-		VIEW_PROJECTION_UNIFORM_NAME,
-		MODEL_MATRIX_UNIFORM_NAME,
-		});
-
-	m_marchingCubesShader.CreateProgram();
-	m_marchingCubesShader.CreateAndAttachShader("mc.vert", ShaderType::Vertex);
-	m_marchingCubesShader.CreateAndAttachShader("mc.geo", ShaderType::Geometry);
-	m_marchingCubesShader.FeedBackVariings();
-	m_marchingCubesShader.BindAttributeLocation(0, "in_Position");
-	m_marchingCubesShader.LinkShaders();
-	m_marchingCubesShader.FindUniforms({ WS_VOXEL_SIZE_UNIFORM_NAME,DENSITY_TEXTURE_UNIFORM_NAME });
 
 
 	if (!m_postProcessProgram.CreateShaders("postprocess.vert", "postprocess.frag"))
@@ -210,29 +154,29 @@ void Scene::Init(const glm::ivec2& ViewPort)
 
 	m_postProcessProgram.FindUniforms({
 		RENDERED_SCENE_TEXTURE_UNIFORM_NAME,
-	});
+		});
 
 
 	for (int i = 0; i < LightCount; ++i)
 	{
 		m_postProcessProgram.FindUniforms({
 			SHADOW_MAP_UNIFORM_NAME_ARRAY[i],
-		});
+			});
 	}
 
 	m_program.UseProgram();
 
-	/*m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 0.f, 0.f), glm::vec4(1.0f,0.f,0.f,1.f) ,0);
+	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 0.f, 0.f), glm::vec4(1.0f, 0.f, 0.f, 1.f), 0);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 0.f, -10.f), glm::vec4(0.0f, 1.f, 0.f, 1.f), 1);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, -5.f, -10.f), glm::vec4(1.0f, 0.f, 1.f, 1.f), 2);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 5.f, 0.f), glm::vec4(1.0f, 1.f, 0.f, 1.f), 0);
 	m_cubeShaderDatas.emplace_back(glm::vec3(-10.f, 0.f, -10.f), glm::vec4(0.5f, 0.5f, 0.f, 1.f), 1);
 	m_cubeShaderDatas.emplace_back(glm::vec3(-10.f, -5.f, -10.f), glm::vec4(1.0f, 0.f, 0.5f, 1.f), 2);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 0.f, 10.f), glm::vec4(0.3f, 0.3f, 0.3f, 1.f), 0);
-	m_cubeShaderDatas.emplace_back(glm::vec3(20.f, 0.f, -10.f), glm::vec4(1.0f, 1.f, 1.f, 1.f), 1);*/
-	//m_cubeShaderDatas.emplace_back(glm::vec3(30.f, 0.f, -10.f), glm::vec4(0.0f, 0.f, 0.f, 1.f), 2);
+	m_cubeShaderDatas.emplace_back(glm::vec3(20.f, 0.f, -10.f), glm::vec4(1.0f, 1.f, 1.f, 1.f), 1);
+	m_cubeShaderDatas.emplace_back(glm::vec3(30.f, 0.f, -10.f), glm::vec4(0.0f, 0.f, 0.f, 1.f), 2);
 
-	glm::vec3 size(1.f,1.f,1.f);
+	glm::vec3 size(1.f, 1.f, 1.f);
 	m_cubeMesh.CreateInstanceOnGPU(MeshCreation::LoadFromFile(CUBE_MESH_PATH)[0]);
 
 	m_screenTriangleMesh.CreateInstanceOnGPU(MeshCreation::CreateScreenTriangle_indexed());
@@ -241,7 +185,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_camera.m_rotation = glm::angleAxis(0.f, glm::vec3(0, 0, 1));
 	m_camera.SetPerspection(1.f, 1000.f, glm::radians(90.f), glm::vec2(ViewPort));
 
-	
+
 
 	m_spotlight[0].m_position = { 40.f, 20.f, 0.f };
 	m_spotlight[0].m_direction = { -1.f, -1.f, 0.f };
@@ -297,7 +241,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_framebuffer.Unbind();
 
 	assert(NormalMapPath.size() == m_normalMaps.size());
-	
+
 	for (size_t i = 0; i < NormalMapPath.size(); ++i)
 	{
 		Image image;
@@ -313,57 +257,8 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	}
 
 	m_allowedSampleSizes = Texture2DMultisample::FindSupportedSampleSizes(m_viewPort);
-
-	m_densityMap.Create();
-	m_densityMap.Bind();
-	m_densityMap.TextureImage(0, GL_R32F, Texture3dDimensions.x, Texture3dDimensions.y, Texture3dDimensions.z, GL_RED, GL_FLOAT, nullptr);
-	m_densityMap.SetNearestNeighbourFiltering();
-	//m_densityMap.SetClampToEdge();
-	m_densityMap.Unbind();
-
-
-
-	// create dummy attributeBuffer
-	{
-		std::vector<glm::vec3> dummyPoints;
-		for (int x = 1; x <= Texture3dDimensionsMinOne.x; ++x)
-		{
-			for (int y = 1; y <= Texture3dDimensionsMinOne.y; ++y)
-			{
-				for (int z = 1; z <= Texture3dDimensionsMinOne.z; ++z)
-				{
-					dummyPoints.push_back(glm::vec3(
-						x * Inversed3dDimensions.x,
-						y * Inversed3dDimensions.y,
-						z * Inversed3dDimensions.z));
-				}
-			}
-		}
-
-		m_marchingCubesVao.Create();
-		m_marchingCubesVao.Bind();
-		m_marchingCubesVao.EnableAttribute(0);
-
-		m_dummyVertices.Create();
-		m_dummyVertices.Bind();
-		m_dummyVertices.UploadBufferData(dummyPoints);
-		m_dummyVertices.SetVertexAttributePtr(0, glm::vec3::length(), GL_FLOAT, sizeof(glm::vec3), 0);
-		m_dummyVertices.Unbind();
-
-		m_marchingCubesVao.Unbind();
-	}
-
-	m_mcLookupBuffer.WriteLookupTablesToGpu();
-
-	DensityPass();
-	GenerateRockFromDensity();
-
-	m_rockVao.Create();
-	m_rockVao.Bind();
-	m_rockVao.EnableAttribute(0);
-
-	m_marchingCubesVao.Unbind();
-
+	m_mcLookup.WriteLookupTablesToGpu();
+	m_rock.GenerateMesh(m_mcLookup);
 }
 
 void Scene::Update(float deltaTime, const InputManager& inputManager)
@@ -376,8 +271,8 @@ void Scene::Update(float deltaTime, const InputManager& inputManager)
 	{
 		m_pathFollower = PathFollower::none;
 	}
-	
-	if(!m_path.IsFollowingPath() || m_pathFollower != PathFollower::camera)
+
+	if (!m_path.IsFollowingPath() || m_pathFollower != PathFollower::camera)
 	{
 		UpdateFreeMovement(deltaTime, inputManager);
 	}
@@ -519,13 +414,12 @@ void Scene::Render()
 {
 	for (int i = 0; i < LightCount; ++i)
 	{
-		if(m_isLightActive[i]) // save performance
+		if (m_isLightActive[i]) // save performance
 		{
 			ShadowMapPass(i);
 		}
 	}
 	RenderScenePass();
-	RenderRock();
 	PostProcessPass();
 }
 
@@ -573,113 +467,6 @@ void Scene::SetMsaaSamplingNumber(GLsizei samples, bool fixedSampleLocations)
 	assert(m_msaaFrameBuffer.IsValid());
 }
 
-void Scene::DensityPass()
-{
-	m_densityFramebuffer.Create();
-	m_densityFramebuffer.Bind();
-
-	glViewport(0, 0, Texture3dDimensions.x, Texture3dDimensions.y);
-
-	m_texture3dProgramm.UseProgram();
-	m_texture3dProgramm.IsValid();
-	
-	for (int layer = 0; layer < Texture3dDimensions.z; ++layer)
-	{
-		m_densityFramebuffer.BindTexture3D(GL_COLOR_ATTACHMENT0, m_densityMap.GetHandle(), 0, layer);
-	
-		m_texture3dProgramm.SetFloatUniform(layer * Texture3dSliceHeight, HIGHT_UNIFORM_NAME);
-		const GLenum framBufferStatus2 = m_densityFramebuffer.GetFrameBufferStatus();
-		assert(framBufferStatus2 == GL_FRAMEBUFFER_COMPLETE);
-		glClear(GL_COLOR_BUFFER_BIT);
-		ASSERT_GL_ERROR_MACRO();
-
-		m_screenTriangleMesh.Render();
-	}
-
-	m_rockVertices.Create();
-	m_rockVertices.Bind();
-	//m_rockVertices.AllocateBufferData(Texture3dNumSamples * sizeof(glm::vec3), GL_STATIC_READ);
-	m_rockVertices.AllocateBufferData(Texture3dNumSamples * sizeof(glm::vec3) * 3, GL_STATIC_READ);
-
-	m_rockVertices.Unbind();
-	m_densityFramebuffer.Unbind();
-
-
-}
-
-void Scene::GenerateRockFromDensity()
-{
-
-	glEnable(GL_RASTERIZER_DISCARD);
-	{
-		m_marchingCubesShader.UseProgram();
-		m_marchingCubesShader.SetFloatUniform(Texture3dSliceHeight, WS_VOXEL_SIZE_UNIFORM_NAME);
-
-		m_mcLookupBuffer.UpdateUniforms(m_marchingCubesShader);
-
-		m_marchingCubesVao.Bind();
-
-		glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_rockVertices.GetHandle());
-
-		m_marchingCubesShader.SetSamplerTextureUnit(0, DENSITY_TEXTURE_UNIFORM_NAME);
-		m_densityMap.BindToTextureUnit(0);
-
-		GLuint query;
-		glGenQueries(1, &query);
-		glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
-		ASSERT_GL_ERROR_MACRO();
-
-		glBeginTransformFeedback(GL_TRIANGLES);
-		ASSERT_GL_ERROR_MACRO();
-
-		
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDrawArrays(GL_POINTS, 0, Texture3dNumSamples);
-		ASSERT_GL_ERROR_MACRO();
-
-
-		glEndTransformFeedback();
-		ASSERT_GL_ERROR_MACRO();
-
-		glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
-		ASSERT_GL_ERROR_MACRO();
-
-	
-		glGetQueryObjectuiv(query, GL_QUERY_RESULT, &m_numRockTriangles);
-		ASSERT_GL_ERROR_MACRO();
-
-		printf("%u primitives written!\n\n", m_numRockTriangles);
-
-		m_marchingCubesVao.Unbind();
-	}
-	glDisable(GL_RASTERIZER_DISCARD);
-	glFlush();
-
-	/*GLfloat*  feedback=  new GLfloat[m_numRockTriangles];
-	glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(float) * m_numRockTriangles, feedback);
-	for (int i = 0; i <m_numRockTriangles; ++i)
-	{
-		printf("%f ", feedback[i]);
-	}
-	delete[] feedback;*/
-
-
-}
-
-void Scene::RenderRock()
-{
-	glViewport(0, 0, m_viewPort.x, m_viewPort.y);
-	m_framebuffer.Bind();
-	m_rockVao.Bind();
-	m_rockVao.EnableAttribute(0);
-	m_rockVertices.Bind();
-	m_rockVertices.SetVertexAttributePtr(0, glm::vec3::length(), GL_FLOAT, sizeof(glm::vec3), 0);
-	glDrawArrays(GL_TRIANGLES, 0, m_numRockTriangles * 3);
-
-	m_rockVao.Unbind();
-	m_framebuffer.Unbind();
-}
-
 void Scene::ShadowMapPass(int LightIndex)
 {
 	assert(LightIndex < LightCount);
@@ -723,9 +510,9 @@ void Scene::RenderScenePass()
 		m_framebuffer.BindTexture(GL_COLOR_ATTACHMENT0, m_colorTexture.GetHandle(), 0);
 	}
 
-	
+
 	m_program.UseProgram();
-	
+
 	glViewport(0, 0, m_viewPort.x, m_viewPort.y);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -739,7 +526,7 @@ void Scene::RenderScenePass()
 		m_shadowDepthTexture[i].BindToTextureUnit(textureUnitCnt);
 		++textureUnitCnt;
 	}
-	
+
 
 	glm::mat4 viewProjection = m_camera.GetPerspectionMatrix() * m_camera.CalcViewMatrix();
 
@@ -750,7 +537,7 @@ void Scene::RenderScenePass()
 		glm::mat4 lightViewProjection = m_spotlight[i].GetPerspectionMatrix() * m_spotlight[i].CalcViewMatrix();
 		m_program.SetMatrixUniform(lightViewProjection, LIGHT_VIEW_PROJECTION_MATRIX_NAME_ARRAY[i]);
 		m_program.SetVec3Uniform(m_spotlight[i].m_position, LIGHT_POS_UNIFORM_NAME_ARRAY[i]);
-	}	
+	}
 
 	m_program.SetVec3Uniform(m_camera.m_position, CAMERA_POS_UNIFORM_NAME);
 
@@ -797,7 +584,7 @@ void Scene::RenderScenePass()
 
 		m_program.SetMatrixUniform(modelMatrix, MODEL_MATRIX_UNIFORM_NAME);
 		m_program.SetMatrixUniform(glm::transpose(glm::inverse(modelMatrix)), INVERSE_TRANSPOSED_MODEL_MATRIX_UNIFORM_NAME);
-		
+
 		m_program.SetVec4Uniform(cubeData.color, COLOR_UNIFORM_NAME);
 		m_cubeMesh.Render();
 	}
@@ -826,7 +613,7 @@ void Scene::RenderScenePass()
 void Scene::PostProcessPass()
 {
 	glViewport(0, 0, m_viewPort.x, m_viewPort.y);
-	
+
 	m_postProcessProgram.UseProgram();
 
 	m_postProcessProgram.SetSamplerTextureUnit(0, RENDERED_SCENE_TEXTURE_UNIFORM_NAME);
@@ -834,8 +621,8 @@ void Scene::PostProcessPass()
 
 	for (int i = 0; i < LightCount; ++i)
 	{
-		m_postProcessProgram.SetSamplerTextureUnit(i+1 , SHADOW_MAP_UNIFORM_NAME_ARRAY[i]);
-		m_shadowDepthTexture[i].BindToTextureUnit(i+1);
+		m_postProcessProgram.SetSamplerTextureUnit(i + 1, SHADOW_MAP_UNIFORM_NAME_ARRAY[i]);
+		m_shadowDepthTexture[i].BindToTextureUnit(i + 1);
 	}
 
 	m_postProcessProgram.IsValid();
@@ -846,6 +633,4 @@ void Scene::PostProcessPass()
 	m_screenTriangleMesh.Render();
 
 }
-
-
 

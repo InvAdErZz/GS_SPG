@@ -168,6 +168,8 @@
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="LookupBuffer.h" />
+    <ClInclude Include="ProceduralMesh.h" />
+    <ClInclude Include="Query.h" />
     <ClInclude Include="RenderBuffer.h" />
     <ClInclude Include="Texture2DMutlisample.h" />
     <ClInclude Include="Texture3d.h" />
@@ -206,6 +208,7 @@
     <ClCompile Include="MeshIndexed.cpp" />
     <ClCompile Include="MeshData.cpp" />
     <ClCompile Include="Path.cpp" />
+    <ClCompile Include="ProceduralMesh.cpp" />
     <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />

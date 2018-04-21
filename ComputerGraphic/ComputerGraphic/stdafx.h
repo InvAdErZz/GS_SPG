@@ -36,5 +36,8 @@
 
 #include "stb_image.h"
 
+#include <array>
+#include <vector>
+
 
 // TODO: reference additional headers your program requires here

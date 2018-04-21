@@ -16,6 +16,7 @@
 #include "Texture2DMutlisample.h"
 #include "Texture3d.h"
 #include "LookupBuffer.h"
+#include "ProceduralMesh.h"
 
 enum class PathFollower
 {
@@ -49,6 +50,7 @@ private:
 
 	Mesh m_cubeMesh;
 	MeshIndexed m_screenTriangleMesh;
+	ProceduralMesh m_rock;
 
 	std::vector<CubeShaderData> m_cubeShaderDatas;
 
@@ -56,31 +58,13 @@ private:
 	ShaderProgram m_program;
 	ShaderProgram m_shadowMapProgram;
 	ShaderProgram m_postProcessProgram;
-	ShaderProgram m_texture3dProgramm;
-	ShaderProgram m_rockShaderProgramm;
 
-	ShaderProgram m_marchingCubesShader;
-
-
-	VertexArray m_marchingCubesVao;
-	AttributeBuffer m_dummyVertices;
-	AttributeBuffer m_rockVertices;
-
-	VertexArray m_rockVao;
-	GLuint m_numRockTriangles;
-	
 	FrameBuffer m_framebuffer;
 	FrameBuffer m_msaaFrameBuffer;
-	FrameBuffer m_densityFramebuffer;
-	FrameBuffer m_mcFramebuffer;
-
+	LookupBuffer m_mcLookup;
 
 	Texture2DMultisample m_msaaColorTexture;
 	Texture2DMultisample m_msaaDepthTexture;
-
-	LookupBuffer m_mcLookupBuffer;
-
-	Texture3d m_densityMap;
 
 	Texture m_colorTexture;
 	Texture m_depthTexture;

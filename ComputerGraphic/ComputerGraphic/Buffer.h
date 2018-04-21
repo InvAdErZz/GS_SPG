@@ -21,8 +21,8 @@ public:
 	void Bind();
 	static void Unbind();
 
-	template<class DataType>
-	void UploadBufferData(const std::vector<DataType>& data);
+	template<class ContainerType>
+	void UploadBufferData(const ContainerType& data);
 
 	template<class DataType, int arraySize>
 	void UploadBufferData(DataType(&data)[arraySize]);
@@ -81,11 +81,11 @@ inline bool Buffer<TYPE>::IsBound() const
 }
 
 template<BufferType TYPE>
-template<class DataType>
-void Buffer<TYPE>::UploadBufferData(const std::vector<DataType>& data)
+template<class ContainerType>
+void Buffer<TYPE>::UploadBufferData(const ContainerType& data)
 {
 	assert(IsBound());
-	glBufferData(BUFFER_TARGET, sizeof(DataType) * data.size(), data.data(), GL_STATIC_DRAW);
+	glBufferData(BUFFER_TARGET, sizeof(ContainerType::value_type) * data.size(), data.data(), GL_STATIC_DRAW);
 	ASSERT_GL_ERROR_MACRO();
 }
 

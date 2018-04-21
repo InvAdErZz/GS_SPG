@@ -28,9 +28,11 @@ private:
 template<class DerivedClass>
 Resource<DerivedClass>::~Resource()
 {
+	DerivedClass* derivedThis = static_cast<DerivedClass*>(this);
+
 	if (IsValid())
 	{
-		static_cast<DerivedClass*>(this)->FreeResource();
+		derivedThis->FreeResource();
 		ASSERT_GL_ERROR_MACRO();
 	}
 }
@@ -46,6 +48,7 @@ template<class DerivedClass>
 inline Resource<DerivedClass>& Resource<DerivedClass>::operator=(Resource<DerivedClass>&& other) noexcept
 {
 	std::swap(m_handle, other.m_handle);
+	return *this;
 }
 
 template<class DerivedClass>

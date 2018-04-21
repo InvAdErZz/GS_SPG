@@ -21,6 +21,8 @@ public:
 	void BindAttributeLocation(GLuint index, const char* name);
 	void UseProgram();
 
+	void UnuseProgram();
+
 	bool CreateShaders(const char* vertexShaderFileName, const char* fragmentShaderFilename);
 	bool CreateProgram();
 	bool CreateAndAttachShader(const char* shaderFileName, ShaderType type);
@@ -37,7 +39,7 @@ public:
 	void SetIntUniform(int value, const std::string & UniformName);
 	void SetFloatUniform(float value, const std::string& UniformName);
 	void SetSamplerTextureUnit(GLint textureUnit, const std::string UniformName);
-	void FeedBackVariings();
+	void SetTranformFeedback();
 
 private:
 	std::vector<Shader> m_shaders;

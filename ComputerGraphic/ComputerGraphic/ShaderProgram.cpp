@@ -7,6 +7,7 @@ ShaderProgram::ShaderProgram()
 
 ShaderProgram::~ShaderProgram()
 {
+	//assert(!IsInUse());
 	for (Shader& shader : m_shaders)
 	{
 		if (shader.GetHandle() != 0)
@@ -64,6 +65,13 @@ void ShaderProgram::UseProgram()
 {
 	assert(m_handle != 0);
 	glUseProgram(m_handle);
+	ASSERT_GL_ERROR_MACRO();
+}
+
+void ShaderProgram::UnuseProgram()
+{
+	assert(IsInUse());
+	glUseProgram(0);
 	ASSERT_GL_ERROR_MACRO();
 }
 
@@ -242,7 +250,7 @@ void ShaderProgram::SetSamplerTextureUnit(GLint textureUnit, const std::string U
 	ASSERT_GL_ERROR_MACRO();
 }
 
-void ShaderProgram::FeedBackVariings()
+void ShaderProgram::SetTranformFeedback()
 {
 	Resource::IsValid();
 	const GLchar* feedbackVaryings[] = { "outValue" };

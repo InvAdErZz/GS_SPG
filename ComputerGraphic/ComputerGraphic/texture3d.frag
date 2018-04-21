@@ -1,15 +1,24 @@
 #version 330 core
 
 out float finalDensity;
-in vec2 screenPos;
 
-uniform float height;
+in VS_OUT
+{
+	vec3 worldSpace;
+	flat int id;
+} frag_in;
+
 
 void main(void) {
-	float density = 1 - height;
-	density -= pow(length(screenPos.xy), 3);
+	
+	float height = frag_in.worldSpace.z;
+	float density = 20;
+	density -= pow(length(frag_in.worldSpace.xy)*5, 3);
 	density +=  cos(height);
 	
-	finalDensity = density;
-	//finalDensity = height;
+	finalDensity = height * 256;
+	finalDensity = frag_in.id;
+	
+	finalDensity = height;
+	//finalDensity = 15;
 }

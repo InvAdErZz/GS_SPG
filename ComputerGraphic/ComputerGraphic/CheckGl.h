@@ -10,7 +10,7 @@
 		GLenum error = glGetError();\
 		if (error != GL_NO_ERROR)\
 		{\
-			/*std::printf("GL Error : Ox%X \n ", error);*/\
+			std::printf("GL Error : Ox%X \n ", error);\
 			assert(false); \
 		}\
 	}while(false)

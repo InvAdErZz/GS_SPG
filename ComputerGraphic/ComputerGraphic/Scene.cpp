@@ -20,9 +20,6 @@ namespace
 	constexpr glm::vec3 Inversed3dDimensions(1.f / Texture3dDimensions.x, 1.f / Texture3dDimensions.y, 1.f / Texture3dDimensions.z);
 	constexpr glm::vec3 Inversed3dDimensionsMinusOne(1.f / Texture3dDimensionsMinOne.x, 1.f / Texture3dDimensionsMinOne.y, 1.f / Texture3dDimensionsMinOne.z);
 
-
-
-
 	constexpr int Texture3dNumSamples = Texture3dDimensions.x * Texture3dDimensions.y * Texture3dDimensions.z;
 	constexpr float Texture3dSliceHeight = 0.5f;
 	constexpr float Texture3dDistanceBetweenPoints = 0.5f;
@@ -174,6 +171,23 @@ void Scene::Init(const glm::ivec2& ViewPort)
 		HIGHT_UNIFORM_NAME
 		});
 
+
+
+	if (!m_rockShaderProgramm.CreateShaders("rock.vert", "rock.frag"))
+	{
+		assert(false);
+	}
+
+	m_rockShaderProgramm.BindAttributeLocation(VertextAttribute::POSITION_ATTRIBUTE_LOCATION, VertextAttribute::POSITION_ATTRIBUTE_NAME);
+	m_rockShaderProgramm.BindAttributeLocation(VertextAttribute::NORMAL_ATTRIBUTE_LOCATION, VertextAttribute::NORMAL_ATTRIBUTE_NAME);
+	m_rockShaderProgramm.BindAttributeLocation(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION, VertextAttribute::TEXCOORD_ATTRIBUTE_NAME);
+	m_rockShaderProgramm.LinkShaders();
+
+	m_rockShaderProgramm.FindUniforms({
+		VIEW_PROJECTION_UNIFORM_NAME,
+		MODEL_MATRIX_UNIFORM_NAME,
+		});
+
 	m_marchingCubesShader.CreateProgram();
 	m_marchingCubesShader.CreateAndAttachShader("mc.vert", ShaderType::Vertex);
 	m_marchingCubesShader.CreateAndAttachShader("mc.geo", ShaderType::Geometry);
@@ -208,15 +222,15 @@ void Scene::Init(const glm::ivec2& ViewPort)
 
 	m_program.UseProgram();
 
-	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 0.f, 0.f), glm::vec4(1.0f,0.f,0.f,1.f) ,0);
+	/*m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 0.f, 0.f), glm::vec4(1.0f,0.f,0.f,1.f) ,0);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 0.f, -10.f), glm::vec4(0.0f, 1.f, 0.f, 1.f), 1);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, -5.f, -10.f), glm::vec4(1.0f, 0.f, 1.f, 1.f), 2);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 5.f, 0.f), glm::vec4(1.0f, 1.f, 0.f, 1.f), 0);
 	m_cubeShaderDatas.emplace_back(glm::vec3(-10.f, 0.f, -10.f), glm::vec4(0.5f, 0.5f, 0.f, 1.f), 1);
 	m_cubeShaderDatas.emplace_back(glm::vec3(-10.f, -5.f, -10.f), glm::vec4(1.0f, 0.f, 0.5f, 1.f), 2);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 0.f, 10.f), glm::vec4(0.3f, 0.3f, 0.3f, 1.f), 0);
-	m_cubeShaderDatas.emplace_back(glm::vec3(20.f, 0.f, -10.f), glm::vec4(1.0f, 1.f, 1.f, 1.f), 1);
-	m_cubeShaderDatas.emplace_back(glm::vec3(30.f, 0.f, -10.f), glm::vec4(0.0f, 0.f, 0.f, 1.f), 2);
+	m_cubeShaderDatas.emplace_back(glm::vec3(20.f, 0.f, -10.f), glm::vec4(1.0f, 1.f, 1.f, 1.f), 1);*/
+	//m_cubeShaderDatas.emplace_back(glm::vec3(30.f, 0.f, -10.f), glm::vec4(0.0f, 0.f, 0.f, 1.f), 2);
 
 	glm::vec3 size(1.f,1.f,1.f);
 	m_cubeMesh.CreateInstanceOnGPU(MeshCreation::LoadFromFile(CUBE_MESH_PATH)[0]);
@@ -343,6 +357,13 @@ void Scene::Init(const glm::ivec2& ViewPort)
 
 	DensityPass();
 	GenerateRockFromDensity();
+
+	m_rockVao.Create();
+	m_rockVao.Bind();
+	m_rockVao.EnableAttribute(0);
+
+	m_marchingCubesVao.Unbind();
+
 }
 
 void Scene::Update(float deltaTime, const InputManager& inputManager)
@@ -504,6 +525,7 @@ void Scene::Render()
 		}
 	}
 	RenderScenePass();
+	RenderRock();
 	PostProcessPass();
 }
 
@@ -576,7 +598,9 @@ void Scene::DensityPass()
 
 	m_rockVertices.Create();
 	m_rockVertices.Bind();
-	m_rockVertices.AllocateBufferData(Texture3dNumSamples * sizeof(glm::vec3), GL_STATIC_READ);
+	//m_rockVertices.AllocateBufferData(Texture3dNumSamples * sizeof(glm::vec3), GL_STATIC_READ);
+	m_rockVertices.AllocateBufferData(Texture3dNumSamples * sizeof(glm::vec3) * 3, GL_STATIC_READ);
+
 	m_rockVertices.Unbind();
 	m_densityFramebuffer.Unbind();
 
@@ -603,16 +627,27 @@ void Scene::GenerateRockFromDensity()
 		GLuint query;
 		glGenQueries(1, &query);
 		glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
+		ASSERT_GL_ERROR_MACRO();
 
 		glBeginTransformFeedback(GL_TRIANGLES);
+		ASSERT_GL_ERROR_MACRO();
+
 		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDrawArrays(GL_POINTS, 0, Texture3dNumSamples);
+		ASSERT_GL_ERROR_MACRO();
+
 
 		glEndTransformFeedback();
+		ASSERT_GL_ERROR_MACRO();
+
 		glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+		ASSERT_GL_ERROR_MACRO();
+
 	
 		glGetQueryObjectuiv(query, GL_QUERY_RESULT, &m_numRockTriangles);
+		ASSERT_GL_ERROR_MACRO();
+
 		printf("%u primitives written!\n\n", m_numRockTriangles);
 
 		m_marchingCubesVao.Unbind();
@@ -620,15 +655,29 @@ void Scene::GenerateRockFromDensity()
 	glDisable(GL_RASTERIZER_DISCARD);
 	glFlush();
 
-	GLfloat*  feedback=  new GLfloat[m_numRockTriangles];
+	/*GLfloat*  feedback=  new GLfloat[m_numRockTriangles];
 	glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(float) * m_numRockTriangles, feedback);
 	for (int i = 0; i <m_numRockTriangles; ++i)
 	{
 		printf("%f ", feedback[i]);
 	}
-	delete[] feedback;
+	delete[] feedback;*/
 
 
+}
+
+void Scene::RenderRock()
+{
+	glViewport(0, 0, m_viewPort.x, m_viewPort.y);
+	m_framebuffer.Bind();
+	m_rockVao.Bind();
+	m_rockVao.EnableAttribute(0);
+	m_rockVertices.Bind();
+	m_rockVertices.SetVertexAttributePtr(0, glm::vec3::length(), GL_FLOAT, sizeof(glm::vec3), 0);
+	glDrawArrays(GL_TRIANGLES, 0, m_numRockTriangles * 3);
+
+	m_rockVao.Unbind();
+	m_framebuffer.Unbind();
 }
 
 void Scene::ShadowMapPass(int LightIndex)

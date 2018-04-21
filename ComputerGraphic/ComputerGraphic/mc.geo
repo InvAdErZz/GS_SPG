@@ -51,32 +51,6 @@ vec3 VertexInterp(float isolevel,vec3 p1,vec3 p2, float density1, float density2
 
 void main()
 {
-	{
-	#if 1
-		outValue = vec3(geo_in[0].sampleDensity[3],geo_in[0].sampleDensity[4],geo_in[0].sampleDensity[5]);
-		EmitVertex();
-	
-		outValue = vec3(geo_in[0].sampleDensity[0],geo_in[0].sampleDensity[1],geo_in[0].sampleDensity[2]);
-		EmitVertex();		
-		
-		outValue = vec3(geo_in[0].sampleDensity[6],geo_in[0].sampleDensity[7],geo_in[0].sampleDensity[0]);
-		EmitVertex();
-		
-		EndPrimitive();
-	#else
-		outValue = vec3(geo_in[0].samplePositions[0].xyz);
-		EmitVertex();
-	
-		outValue = vec3(geo_in[0].samplePositions[1].xyz);
-		EmitVertex();		
-		
-		outValue = vec3(geo_in[0].samplePositions[2].xyz);
-		EmitVertex();
-		
-		EndPrimitive();
-	#endif
-	}
-
 
 	vec3 verticesOnEdge[12];
 	int isoLevel = 0;
@@ -124,6 +98,6 @@ void main()
 		outValue = pos3;
 		EmitVertex();
 		
-		EndPrimitive();
+		EndPrimitive();		
 	}
 }

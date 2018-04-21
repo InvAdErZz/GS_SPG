@@ -42,6 +42,7 @@ private:
 
 	void DensityPass();
 	void GenerateRockFromDensity();
+	void RenderRock();
 	void ShadowMapPass(int LightIndex);
 	void RenderScenePass();
 	void PostProcessPass();
@@ -56,6 +57,7 @@ private:
 	ShaderProgram m_shadowMapProgram;
 	ShaderProgram m_postProcessProgram;
 	ShaderProgram m_texture3dProgramm;
+	ShaderProgram m_rockShaderProgramm;
 
 	ShaderProgram m_marchingCubesShader;
 
@@ -63,6 +65,8 @@ private:
 	VertexArray m_marchingCubesVao;
 	AttributeBuffer m_dummyVertices;
 	AttributeBuffer m_rockVertices;
+
+	VertexArray m_rockVao;
 	GLuint m_numRockTriangles;
 	
 	FrameBuffer m_framebuffer;

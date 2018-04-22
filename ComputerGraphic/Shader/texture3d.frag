@@ -7,7 +7,6 @@ in VS_OUT
 	vec3 worldSpace;
 } frag_in;
 
-
 void main(void) {
 	
 	/*

@@ -27,15 +27,6 @@ namespace
 
 	const std::string INVERSED_3D_DIM_UNIFORM_NAME("inversedTexture3dDimensions");
 
-
-	const std::array<glm::vec3, 3> screenTriangle = { 
-		glm::vec3{ -1.0f, -1.0f, 0.f},
-		glm::vec3{ 3.f, -1.f, 0.f },
-		glm::vec3{ -1.f, 3.f, 0.f }
-	};
-
-
-
 	constexpr int DummyPointsNum = Texture3dDimensionsMinOne.x * Texture3dDimensionsMinOne.y;
 	const std::vector<glm::vec2> dummyPoints = []()
 	{
@@ -75,34 +66,18 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 			assert(false);
 		}
 
-		densityShader.BindAttributeLocation(0, "in_Position");
 		densityShader.LinkShaders();
 		densityShader.FindUniforms({
 			HIGHT_UNIFORM_NAME
 			});
 
-		AttributeBuffer screenTriangleBuffer;
-		screenTriangleBuffer.Create();
-		screenTriangleBuffer.Bind();
-		screenTriangleBuffer.UploadBufferData(screenTriangle);
-
-		VertexArray densityVao;
-		densityVao.Create();
-		densityVao.Bind();
-
-		// Set position vertices
-		screenTriangleBuffer.SetVertexAttributePtr(0, glm::vec3::length(), GL_FLOAT, sizeof(glm::vec3), 0);
-		densityVao.EnableAttribute(0);
 		densityShader.UseProgram();
 		FrameBuffer densityFrameBuffer;
 		densityFrameBuffer.Create();
 		densityFrameBuffer.Bind();
-		//densityFrameBuffer.BindTexture(GL_COLOR_ATTACHMENT0, desityTexture.GetHandle(), 0);
 
 		glViewport(0, 0, Texture3dDimensions.x, Texture3dDimensions.y);
 	
-
-		int test = 0;
 		for (size_t i = 0; i < 256; i++)
 		{
 
@@ -112,15 +87,12 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 			
 			glClear(GL_COLOR_BUFFER_BIT);
 			ASSERT_GL_ERROR_MACRO();
+			// we don't need a vbo or vao as we don't need any inputdata. We are just drawing a screen triangle. Look inside shader for more.
 			glDrawArrays(GL_TRIANGLES, 0, 3);
 			ASSERT_GL_ERROR_MACRO();
 		}
-
-		//glDrawArraysInstanced(GL_TRIANGLES, 0, 6, Texture3dDimensions.z);
 		
 		densityFrameBuffer.Unbind();
-		screenTriangleBuffer.Unbind();
-		densityVao.Unbind();
 		densityShader.UnuseProgram();
 	}
 

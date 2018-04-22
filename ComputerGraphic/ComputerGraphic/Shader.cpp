@@ -33,6 +33,7 @@ bool Shader::Create(const char* filename)
 {
 	std::string fileContent = ReadFile(filename);
 	GLint length = fileContent.length();
+	assert(length > 0 && "file not found!");
 	const char* data = fileContent.data();
 
 	m_handle = glCreateShader(m_shaderType);

@@ -85,7 +85,7 @@ namespace
 void Scene::Init(const glm::ivec2& ViewPort)
 {
 	m_viewPort = ViewPort;
-	if (!m_program.CreateShaders("shader.vert", "shader.frag"))
+	if (!m_program.CreateShaders("../Shader/shader.vert", "../Shader/shader.frag"))
 	{
 		assert(false);
 	}
@@ -125,7 +125,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	}
 
 
-	if (!m_shadowMapProgram.CreateShaders("shadowmap.vert", "shadowmap.frag"))
+	if (!m_shadowMapProgram.CreateShaders("../Shader/shadowmap.vert", "../Shader/shadowmap.frag"))
 	{
 		assert(false);
 	}
@@ -141,7 +141,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 		});
 
 
-	if (!m_postProcessProgram.CreateShaders("postprocess.vert", "postprocess.frag"))
+	if (!m_postProcessProgram.CreateShaders("../Shader/postprocess.vert", "../Shader/postprocess.frag"))
 	{
 		assert(false);
 	}

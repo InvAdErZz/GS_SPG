@@ -14,8 +14,9 @@ namespace
 	constexpr float Texture3dDistanceBetweenPoints = 0.5f;
 
 
-	constexpr glm::vec3 Inversed3dDimensionsMinusOne(1.f / Texture3dDimensionsMinOne.x, 1.f / Texture3dDimensionsMinOne.y, 1.f / Texture3dDimensionsMinOne.z);
+	//constexpr glm::vec3 Inversed3dDimensionsMinusOne(1.f / Texture3dDimensionsMinOne.x, 1.f / Texture3dDimensionsMinOne.y, 1.f / Texture3dDimensionsMinOne.z);
 	const std::string WS_VOXEL_SIZE_UNIFORM_NAME("worldSpaceVoxelSize");
+	const std::string INVERSED_NUM_LAYERS_UNIFORM_NAME("inversedNumLayers");
 
 	const std::string HIGHT_UNIFORM_NAME("height");
 	const std::string DENSITY_TEXTURE_UNIFORM_NAME("densityTex");
@@ -24,8 +25,10 @@ namespace
 	const std::string COLOR_UNIFORM_NAME("color");
 	const std::string MODEL_MATRIX_UNIFORM_NAME("model");
 
+	const std::string INVERSED_3D_DIM_UNIFORM_NAME("inversedTexture3dDimensions");
 
-	std::array<glm::vec3, 3> screenTriangle = { 
+
+	const std::array<glm::vec3, 3> screenTriangle = { 
 		glm::vec3{ -1.0f, -1.0f, 0.f},
 		glm::vec3{ 3.f, -1.f, 0.f },
 		glm::vec3{ -1.f, 3.f, 0.f }
@@ -33,27 +36,16 @@ namespace
 
 
 
-	constexpr int DummyPointsNum = Texture3dDimensionsMinOne.x * Texture3dDimensionsMinOne.y * Texture3dDimensionsMinOne.z;
-	const std::vector<glm::vec3> dummyPoints = []()
+	constexpr int DummyPointsNum = Texture3dDimensionsMinOne.x * Texture3dDimensionsMinOne.y;
+	const std::vector<glm::vec2> dummyPoints = []()
 	{
-		std::vector<glm::vec3> result;
+		std::vector<glm::vec2> result;
 		result.reserve(DummyPointsNum);
-		for (int x = 1; x <= Texture3dDimensionsMinOne.x; ++x)
+		for (int x = 0; x < Texture3dDimensionsMinOne.x; ++x)
 		{
-			for (int y = 1; y <= Texture3dDimensionsMinOne.y; ++y)
+			for (int y = 0; y < Texture3dDimensionsMinOne.y; ++y)
 			{
-				for (int z = 1; z <= Texture3dDimensionsMinOne.z; ++z)
-				{
-#if 1
-					result.push_back(glm::vec3(
-						x * Inversed3dDimensions.x,
-						y * Inversed3dDimensions.y,
-						z * Inversed3dDimensions.z)
-					);
-#else
-					result.push_back(glm::vec3(x,y,	z));
-#endif
-				}
+				result.push_back(glm::vec2(x, y));
 			}
 		}
 		assert(result.size() == DummyPointsNum);
@@ -78,7 +70,7 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 	// Fill Density Texture
 	{
 		ShaderProgram densityShader;
-		if (!densityShader.CreateShaders("texture3d.vert", "texture3d.frag"))
+		if (!densityShader.CreateShaders("../Shader/texture3d.vert", "../Shader/texture3d.frag"))
 		{
 			assert(false);
 		}
@@ -139,28 +131,21 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 	// reserve enough space
 	rockVertexBuffer.AllocateBufferData(Texture3dNumSamples * sizeof(glm::vec3) * 3, GL_STATIC_READ);
 
-	GLuint numRockVertices = 0;
+	GLuint numRockPrimitives = 0;
 
 	{
-		AttributeBuffer pointCloudBuffer;
-		pointCloudBuffer.Create();
-		pointCloudBuffer.Bind();
-		pointCloudBuffer.UploadBufferData(screenTriangle);
-
-		VertexArray mcVao;
-		mcVao.Create();
-		mcVao.Bind();
-		pointCloudBuffer.SetVertexAttributePtr(0, glm::vec3::length(), GL_FLOAT, sizeof(glm::vec3), 0);
-
-
 		ShaderProgram marchingCubesShader;
 		marchingCubesShader.CreateProgram();
-		marchingCubesShader.CreateAndAttachShader("mc.vert", ShaderType::Vertex);
-		marchingCubesShader.CreateAndAttachShader("mc.geo", ShaderType::Geometry);
+		marchingCubesShader.CreateAndAttachShader("../Shader/mc.vert", ShaderType::Vertex);
+		marchingCubesShader.CreateAndAttachShader("../Shader/mc.geo", ShaderType::Geometry);
 		marchingCubesShader.BindAttributeLocation(0, "in_Position");
 		marchingCubesShader.SetTranformFeedback();
 		marchingCubesShader.LinkShaders();
-		marchingCubesShader.FindUniforms({ WS_VOXEL_SIZE_UNIFORM_NAME,DENSITY_TEXTURE_UNIFORM_NAME });
+		marchingCubesShader.FindUniforms({ 
+			WS_VOXEL_SIZE_UNIFORM_NAME
+			,DENSITY_TEXTURE_UNIFORM_NAME, 
+			INVERSED_NUM_LAYERS_UNIFORM_NAME,
+			INVERSED_3D_DIM_UNIFORM_NAME });
 
 		// Setup shader Uniforms
 		// Enable using the lookup buffer data to be used in the marching cubes shader
@@ -169,7 +154,41 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 		marchingCubesShader.SetSamplerTextureUnit(0, DENSITY_TEXTURE_UNIFORM_NAME);
 		desityTexture.BindToTextureUnit(0);
 
-		marchingCubesShader.SetFloatUniform(Inversed3dDimensions.x, WS_VOXEL_SIZE_UNIFORM_NAME);
+		marchingCubesShader.SetFloatUniform(1.f, WS_VOXEL_SIZE_UNIFORM_NAME);
+		marchingCubesShader.SetVec3Uniform(Inversed3dDimensions, INVERSED_3D_DIM_UNIFORM_NAME);
+		//marchingCubesShader.SetFloatUniform(1.f / Inversed3dDimensionsMinusOne.z, INVERSED_NUM_LAYERS_UNIFORM_NAME);
+		
+		VertexArray mcVao;
+		mcVao.Create();
+		mcVao.Bind();
+		mcVao.EnableAttribute(0);
+
+		printf("MC VAO %d:\n ", mcVao.GetHandle());
+
+		AttributeBuffer pointCloudBuffer;
+		pointCloudBuffer.Create();
+		pointCloudBuffer.Bind();
+		pointCloudBuffer.UploadBufferData(dummyPoints);
+
+		pointCloudBuffer.SetVertexAttributePtr(0, glm::vec2::length(), GL_FLOAT, sizeof(glm::vec2), 0);
+
+		printf("pointCloudBuffer %d:\n ", pointCloudBuffer.GetHandle());
+
+		GLsizei buffSize = dummyPoints.size() * glm::vec2::length();
+		GLfloat*  buffData = new GLfloat[buffSize];
+		glGetBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * buffSize, buffData);
+
+		for (int i = 0; i < buffSize; i+=2)
+		{
+			if (i % 90 != 0)
+			{
+				continue;
+			}
+			//printf("point %d: %d,%d, \n ",i/2, buffData[i], buffData[i+1]);
+		}
+		delete[] buffData;
+
+		glFlush();
 
 
 		// Bind rockVertexBuffer to transform feedback, output from geometry shader will be saved in there
@@ -187,7 +206,10 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 		// Disable Rasterizer / fragment shader
 		glEnable(GL_RASTERIZER_DISCARD);
 
-		glDrawArrays(GL_POINTS, 0, Texture3dNumSamples);
+		assert(dummyPoints.size() == Texture3dDimensionsMinOne.y * Texture3dDimensionsMinOne.x);
+
+		//glDrawArraysInstanced(GL_POINTS, 0, dummyPoints.size(), 1);
+		glDrawArraysInstanced(GL_POINTS, 0, dummyPoints.size(), Texture3dDimensionsMinOne.z);
 
 		// Reenable Rasterizer / fragment shader
 		glDisable(GL_RASTERIZER_DISCARD);
@@ -196,30 +218,31 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 		ASSERT_GL_ERROR_MACRO();
 
 		query.End();
-		numRockVertices = query.GetResult();
-
-		printf("%u primitives written!\n\n", numRockVertices);
-
+		numRockPrimitives = query.GetResult();
+	
+		printf("%u primitives written!\n\n", numRockPrimitives);
+		GLuint numRockVertices = numRockPrimitives * 3;
+		GLuint numRockFloats = numRockVertices * 3;
 		pointCloudBuffer.Unbind();
 		mcVao.Unbind();
 		marchingCubesShader.UnuseProgram();
 
-		GLfloat*  feedback=  new GLfloat[numRockVertices];
-		glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(float) * numRockVertices, feedback);
-		for (int i = 0; i < numRockVertices; ++i)
+		GLfloat*  feedback=  new GLfloat[numRockFloats];
+		glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(GLfloat) * numRockFloats, feedback);
+		for (int i = 0; i < numRockFloats; i+=9)
 		{
-			if (i % 20 != 0)
+			if (i % 900 != 0)
 			{
 				continue;
 			}
-			printf("%f ", feedback[i]);
+			printf("tri %d: %f,%f,%f | %f,%f,%f | %f,%f,%f \n ",i/9, feedback[i], feedback[i+1], feedback[i+2], feedback[i+3], feedback[i+4], feedback[i+5], feedback[i+6], feedback[i+7], feedback[i+8]);
 		}
 		delete[] feedback;
 
 	}
 
 	m_rockVertices = std::move(rockVertexBuffer);
-	m_numRockTriangles = numRockVertices;
+	m_numRockTriangles = numRockPrimitives;
 }
 
 void ProceduralMesh::Render()

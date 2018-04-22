@@ -39,12 +39,13 @@ void Init()
 		exit(1);
 	}
 
-	window.CreateContext();
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	window.CreateContext();
+
 
 	// This makes our buffer swap syncronized with the monitor's vertical refresh
 	SDL_GL_SetSwapInterval(1);

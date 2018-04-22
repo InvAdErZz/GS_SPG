@@ -85,8 +85,6 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 			
 			densityShader.SetFloatUniform(i, HIGHT_UNIFORM_NAME);
 			
-			glClear(GL_COLOR_BUFFER_BIT);
-			ASSERT_GL_ERROR_MACRO();
 			// we don't need a vbo or vao as we don't need any inputdata. We are just drawing a screen triangle. Look inside shader for more.
 			glDrawArrays(GL_TRIANGLES, 0, 3);
 			ASSERT_GL_ERROR_MACRO();
@@ -95,6 +93,58 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 		densityFrameBuffer.Unbind();
 		densityShader.UnuseProgram();
 	}
+
+	// Create NormalAmbient Texture
+	Texture3d normalAmbientTexture;
+	normalAmbientTexture.Create();
+	normalAmbientTexture.Bind();
+	normalAmbientTexture.TextureImage(0, GL_RGBA, Texture3dDimensions.x, Texture3dDimensions.y, Texture3dDimensions.z, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	normalAmbientTexture.SetNearestNeighbourFiltering();
+
+	 // Fill  NormalAmbient Texture
+	 {
+		ShaderProgram normalAmbientShader;
+		if (!normalAmbientShader.CreateShaders("../Shader/normalAmbient.vert", "../Shader/normalAmbient.frag"))
+		{
+			assert(false);
+		}
+
+		normalAmbientShader.LinkShaders();
+		normalAmbientShader.FindUniforms({
+			HIGHT_UNIFORM_NAME,
+			DENSITY_TEXTURE_UNIFORM_NAME,
+			INVERSED_3D_DIM_UNIFORM_NAME
+			});
+
+		normalAmbientShader.UseProgram();
+
+		FrameBuffer normalAmbientFramebuffer;
+		normalAmbientFramebuffer.Create();
+		normalAmbientFramebuffer.Bind();
+
+		normalAmbientShader.SetSamplerTextureUnit(0, DENSITY_TEXTURE_UNIFORM_NAME);
+		normalAmbientShader.SetVec3Uniform(Inversed3dDimensions, INVERSED_3D_DIM_UNIFORM_NAME);
+		desityTexture.BindToTextureUnit(0);
+
+		glViewport(0, 0, Texture3dDimensions.x, Texture3dDimensions.y);
+
+		for (size_t i = 0; i < 256; i++)
+		{
+			normalAmbientFramebuffer.BindTexture3D(GL_COLOR_ATTACHMENT0, normalAmbientTexture.GetHandle(), 0, i);
+			normalAmbientShader.SetFloatUniform(i * Inversed3dDimensions.z, HIGHT_UNIFORM_NAME);
+
+			glClear(GL_COLOR_BUFFER_BIT);
+			ASSERT_GL_ERROR_MACRO();
+			// we don't need a vbo or vao as we don't need any inputdata. We are just drawing a screen triangle. Look inside shader for more.
+			glDrawArrays(GL_TRIANGLES, 0, 3);
+			ASSERT_GL_ERROR_MACRO();
+		}
+
+		normalAmbientFramebuffer.Unbind();
+		normalAmbientShader.UnuseProgram();
+	}
+
+
 
 	// create buffer for rock vertices
 	AttributeBuffer rockVertexBuffer;
@@ -115,9 +165,7 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 		marchingCubesShader.LinkShaders();
 		marchingCubesShader.FindUniforms({ 
 			WS_VOXEL_SIZE_UNIFORM_NAME
-			,DENSITY_TEXTURE_UNIFORM_NAME, 
-			INVERSED_NUM_LAYERS_UNIFORM_NAME,
-			INVERSED_3D_DIM_UNIFORM_NAME });
+			,DENSITY_TEXTURE_UNIFORM_NAME });
 
 		// Setup shader Uniforms
 		// Enable using the lookup buffer data to be used in the marching cubes shader
@@ -127,8 +175,6 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 		desityTexture.BindToTextureUnit(0);
 
 		marchingCubesShader.SetFloatUniform(1.f, WS_VOXEL_SIZE_UNIFORM_NAME);
-		marchingCubesShader.SetVec3Uniform(Inversed3dDimensions, INVERSED_3D_DIM_UNIFORM_NAME);
-		//marchingCubesShader.SetFloatUniform(1.f / Inversed3dDimensionsMinusOne.z, INVERSED_NUM_LAYERS_UNIFORM_NAME);
 		
 		VertexArray mcVao;
 		mcVao.Create();

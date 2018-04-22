@@ -97,7 +97,14 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_rockShaderProgram.FindUniforms({
 		VIEW_PROJECTION_UNIFORM_NAME,
 		MODEL_MATRIX_UNIFORM_NAME,
+		INVERSE_TRANSPOSED_MODEL_MATRIX_UNIFORM_NAME,
+		CAMERA_POS_UNIFORM_NAME,
 		});
+
+	for (int i = 0; i < LightCount; ++i)
+	{
+		m_rockShaderProgram.FindUniform(LIGHT_POS_UNIFORM_NAME_ARRAY[i]);
+	}
 
 
 	if (!m_program.CreateShaders("../Shader/shader.vert", "../Shader/shader.frag"))
@@ -619,8 +626,21 @@ void Scene::RenderScenePass()
 
 
 	m_rockShaderProgram.UseProgram();
-	m_rockShaderProgram.SetMatrixUniform(glm::scale(glm::vec3(10.f, 10.f, 10.f)), MODEL_MATRIX_UNIFORM_NAME);
+
+	const glm::mat4 rockModelMat = glm::scale(glm::vec3(10.f, 10.f, 10.f));
+	m_rockShaderProgram.SetMatrixUniform(rockModelMat, MODEL_MATRIX_UNIFORM_NAME);
+
+	const glm::mat4 invTranspRockModelMat = glm::transpose(glm::inverse(rockModelMat));
+	m_rockShaderProgram.SetMatrixUniform(invTranspRockModelMat, INVERSE_TRANSPOSED_MODEL_MATRIX_UNIFORM_NAME);
+	
 	m_rockShaderProgram.SetMatrixUniform(viewProjection, VIEW_PROJECTION_UNIFORM_NAME);
+	m_rockShaderProgram.SetVec3Uniform(m_camera.m_position, CAMERA_POS_UNIFORM_NAME);
+
+	for (int i = 0; i < LightCount; ++i)
+	{
+		m_rockShaderProgram.SetVec3Uniform(m_spotlight[i].m_position, LIGHT_POS_UNIFORM_NAME_ARRAY[i]);
+	}
+
 	m_rock.Render();
 
 	m_rockShaderProgram.UnuseProgram();

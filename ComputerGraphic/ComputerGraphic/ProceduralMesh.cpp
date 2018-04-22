@@ -152,7 +152,12 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 	rockVertexBuffer.Create();
 	rockVertexBuffer.Bind();
 	// reserve enough space
-	rockVertexBuffer.AllocateBufferData(Texture3dNumSamples * sizeof(glm::vec3) * 3, GL_STATIC_READ);
+	// 5 triangles 
+	// vertex
+	constexpr int rockBufferbytes = 1024 * 1024 * 10;
+		//Texture3dNumSamples * 5 * 3 * sizeof(ProceduralMeshVertex);
+
+	rockVertexBuffer.AllocateBufferData(rockBufferbytes, GL_STATIC_READ);
 
 	GLuint numRockPrimitives = 0;
 
@@ -164,7 +169,7 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 		marchingCubesShader.BindAttributeLocation(0, "in_Position");
 		const char* tranformFeedbackOutput[] = { 
 			"geo_out.position"
-			//, "geo_out.normal" 
+			, "geo_out.normal" 
 		};
 		marchingCubesShader.SetTranformFeedback(tranformFeedbackOutput);
 
@@ -252,20 +257,20 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 	
 		printf("%u primitives written!\n\n", numRockPrimitives);
 		GLuint numRockVertices = numRockPrimitives * 3;
-		GLuint numRockFloats = numRockVertices * 3;
+		GLuint numRockFloats = numRockVertices * 6;
 		pointCloudBuffer.Unbind();
 		mcVao.Unbind();
 		marchingCubesShader.UnuseProgram();
 
 		GLfloat*  feedback=  new GLfloat[numRockFloats];
 		glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(GLfloat) * numRockFloats, feedback);
-		for (int i = 0; i < numRockFloats; i+=9)
+		for (int i = 0; i < numRockFloats; i+=18)
 		{
 			if (i % 9000 != 0)
 			{
 				continue;
 			}
-			printf("tri %d: %f,%f,%f | %f,%f,%f | %f,%f,%f \n ",i/9, feedback[i], feedback[i+1], feedback[i+2], feedback[i+3], feedback[i+4], feedback[i+5], feedback[i+6], feedback[i+7], feedback[i+8]);
+			printf("tri %d: v %f,%f,%f | %f,%f,%f | %f,%f,%f \n ",i/18, feedback[i], feedback[i+1], feedback[i+2], feedback[i+6], feedback[i+7], feedback[i+8], feedback[i+12], feedback[i+13], feedback[i+14]);
 		}
 		delete[] feedback;
 
@@ -280,15 +285,15 @@ void ProceduralMesh::Render()
 	VertexArray renderVao;
 	renderVao.Create();
 	renderVao.Bind();
-	renderVao.EnableAttribute(0);
-	renderVao.EnableAttribute(1);
+	renderVao.EnableAttribute(ProceduralMeshVertex::PositionLocation);
+	renderVao.EnableAttribute(ProceduralMeshVertex::NormalLocation);
 
 	m_rockVertices.Bind();
 	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::PositionLocation, glm::vec3::length(),
 		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, position));
 
-	/*m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::NormalLocation, glm::vec3::length(),
-		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, normal));*/
+	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::NormalLocation, glm::vec3::length(),
+		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, normal));
 
 	glDisable(GL_CULL_FACE);
 	glDrawArrays(GL_TRIANGLES, 0, m_numRockTriangles * 3);

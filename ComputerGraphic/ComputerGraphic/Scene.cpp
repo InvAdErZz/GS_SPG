@@ -90,7 +90,8 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	{
 		assert(false);
 	}
-	m_rockShaderProgram.BindAttributeLocation(0, VertextAttribute::POSITION_ATTRIBUTE_NAME);
+	m_rockShaderProgram.BindAttributeLocation(ProceduralMeshVertex::PositionLocation, ProceduralMeshVertex::POSITION_ATTRIBUTE_NAME);
+	m_rockShaderProgram.BindAttributeLocation(ProceduralMeshVertex::NormalLocation, ProceduralMeshVertex::NORMAL_ATTRIBUTE_NAME);
 
 	m_rockShaderProgram.LinkShaders();
 	m_rockShaderProgram.FindUniforms({
@@ -615,8 +616,10 @@ void Scene::RenderScenePass()
 		m_cubeMesh.Render();
 	}
 
+
+
 	m_rockShaderProgram.UseProgram();
-	m_rockShaderProgram.SetMatrixUniform(glm::mat4(1.f), MODEL_MATRIX_UNIFORM_NAME);
+	m_rockShaderProgram.SetMatrixUniform(glm::scale(glm::vec3(10.f, 10.f, 10.f)), MODEL_MATRIX_UNIFORM_NAME);
 	m_rockShaderProgram.SetMatrixUniform(viewProjection, VIEW_PROJECTION_UNIFORM_NAME);
 	m_rock.Render();
 

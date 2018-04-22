@@ -33,7 +33,7 @@ in VS_OUT
 struct ProceduralMeshVertex
 {
 	vec3 position;
-	//vec3 normal;
+	vec3 normal;
 };
 
 
@@ -112,14 +112,17 @@ void main()
 		
 		geo_out.position = pos1;
 		//geo_out.normal = texture(normalAmbientTex, pos1).xyz;
+		geo_out.normal = vec3(1,1,1);
 		EmitVertex();
 		
 		geo_out.position = pos2;
+		geo_out.normal = vec3(2,2,2);
 		//geo_out.normal = texture(normalAmbientTex, pos2).xyz;
 		EmitVertex();
 		
 		geo_out.position = pos3;
 		//geo_out.normal = texture(normalAmbientTex, pos3).xyz;
+		geo_out.normal = vec3(3,3,3);
 		EmitVertex();
 		
 		EndPrimitive();		

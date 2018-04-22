@@ -2,8 +2,9 @@
 
 const int maxLights = 2;
 
-layout (location = 0) in vec3 in_Position; // the position variable has attribute position 0
- 
+layout (location = 0) in vec3 in_Position;
+layout (location = 1) in vec3 in_Normal;
+
 out vec4 ex_Color;
 out vec3 LightDirTangentSpace[maxLights];
 out vec4 FragPosLightSpace[maxLights];

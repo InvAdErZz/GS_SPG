@@ -250,9 +250,4 @@ void ShaderProgram::SetSamplerTextureUnit(GLint textureUnit, const std::string U
 	ASSERT_GL_ERROR_MACRO();
 }
 
-void ShaderProgram::SetTranformFeedback()
-{
-	Resource::IsValid();
-	const GLchar* feedbackVaryings[] = { "outValue" };
-	glTransformFeedbackVaryings(GetHandle(), 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
-}
+

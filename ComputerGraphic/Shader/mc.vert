@@ -10,7 +10,7 @@ out VS_OUT
 } vs_out;
 
 
-uniform float worldSpaceVoxelSize = 1.f;
+uniform vec3 inversedTexture3dDimensions;
 
 uniform sampler3D densityTex;
 
@@ -32,9 +32,7 @@ void main(void) {
 	for(int i = 0; i <8 ; ++i)
 	{
 		vs_out.sampleDensity[i] =  texelFetch(densityTex, texSamplePos[i], 0).r;
-		vs_out.samplePositions[i] =  texSamplePos[i] * worldSpaceVoxelSize;
-		
-		
+		vs_out.samplePositions[i] =  texSamplePos[i] * inversedTexture3dDimensions;
 	}	
 	
 	gl_Position = vec4(vs_out.samplePositions[0],1);

@@ -20,6 +20,7 @@ namespace
 
 	const std::string HIGHT_UNIFORM_NAME("height");
 	const std::string DENSITY_TEXTURE_UNIFORM_NAME("densityTex");
+	const std::string NORMAL_AMBIENT_TEXTURE_UNIFORM_NAME("normalAmbientTex");
 
 	const std::string VIEW_PROJECTION_UNIFORM_NAME("viewProjection");
 	const std::string COLOR_UNIFORM_NAME("color");
@@ -161,11 +162,18 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 		marchingCubesShader.CreateAndAttachShader("../Shader/mc.vert", ShaderType::Vertex);
 		marchingCubesShader.CreateAndAttachShader("../Shader/mc.geo", ShaderType::Geometry);
 		marchingCubesShader.BindAttributeLocation(0, "in_Position");
-		marchingCubesShader.SetTranformFeedback();
+		const char* tranformFeedbackOutput[] = { 
+			"geo_out.position"
+			//, "geo_out.normal" 
+		};
+		marchingCubesShader.SetTranformFeedback(tranformFeedbackOutput);
+
 		marchingCubesShader.LinkShaders();
 		marchingCubesShader.FindUniforms({ 
-			WS_VOXEL_SIZE_UNIFORM_NAME
-			,DENSITY_TEXTURE_UNIFORM_NAME });
+			WS_VOXEL_SIZE_UNIFORM_NAME,
+			DENSITY_TEXTURE_UNIFORM_NAME,
+			INVERSED_3D_DIM_UNIFORM_NAME,
+			NORMAL_AMBIENT_TEXTURE_UNIFORM_NAME });
 
 		// Setup shader Uniforms
 		// Enable using the lookup buffer data to be used in the marching cubes shader
@@ -174,7 +182,11 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 		marchingCubesShader.SetSamplerTextureUnit(0, DENSITY_TEXTURE_UNIFORM_NAME);
 		desityTexture.BindToTextureUnit(0);
 
+		marchingCubesShader.SetSamplerTextureUnit(1, NORMAL_AMBIENT_TEXTURE_UNIFORM_NAME);
+		normalAmbientTexture.BindToTextureUnit(1);
+
 		marchingCubesShader.SetFloatUniform(1.f, WS_VOXEL_SIZE_UNIFORM_NAME);
+		marchingCubesShader.SetVec3Uniform(Inversed3dDimensions, INVERSED_3D_DIM_UNIFORM_NAME);
 		
 		VertexArray mcVao;
 		mcVao.Create();
@@ -269,9 +281,15 @@ void ProceduralMesh::Render()
 	renderVao.Create();
 	renderVao.Bind();
 	renderVao.EnableAttribute(0);
+	renderVao.EnableAttribute(1);
 
 	m_rockVertices.Bind();
-	m_rockVertices.SetVertexAttributePtr(0, glm::vec3::length(), GL_FLOAT, sizeof(glm::vec3), 0);
+	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::PositionLocation, glm::vec3::length(),
+		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, position));
+
+	/*m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::NormalLocation, glm::vec3::length(),
+		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, normal));*/
+
 	glDisable(GL_CULL_FACE);
 	glDrawArrays(GL_TRIANGLES, 0, m_numRockTriangles * 3);
 	glEnable(GL_CULL_FACE);

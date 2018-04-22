@@ -3,6 +3,9 @@
 layout(points) in;
 layout(triangle_strip, max_vertices = 15) out;
 uniform sampler3D densityTex;
+uniform sampler3D normalAmbientTex;
+
+uniform vec3 inversedTexture3dDimensions;
 
 struct CellTriangles
 {
@@ -27,7 +30,14 @@ in VS_OUT
    float sampleDensity[8];
 } geo_in[];
 
-out vec3 outValue;
+struct ProceduralMeshVertex
+{
+	vec3 position;
+	//vec3 normal;
+};
+
+
+out ProceduralMeshVertex geo_out;
 
 vec3 VertexInterp(float isolevel,vec3 p1,vec3 p2, float density1, float density2)
 {
@@ -46,31 +56,23 @@ vec3 VertexInterp(float isolevel,vec3 p1,vec3 p2, float density1, float density2
 
    return(p);
 }
+vec3 CalcNormal(vec3 texspace)
+{
+	vec4 step = vec4(inversedTexture3dDimensions, 0);
+	vec3 gradient = vec3(
+		texture(densityTex, texspace + step.xww).r - texture(densityTex, texspace - step.xww ).r,
+		texture(densityTex, texspace + step.wyw).r - texture(densityTex, texspace - step.wyw ).r,
+		texture(densityTex, texspace + step.wwz).r - texture(densityTex, texspace - step.wwz ).r
+		);
+		
+	vec3 normalVec = normalize(-gradient);
+	return normalVec;
+}
+	
+
+
 void main()
 {
-#if 0
-	outValue = vec3(geo_in[0].sampleDensity[0],geo_in[0].sampleDensity[1], geo_in[0].sampleDensity[2]);
-	EmitVertex();
-	outValue = vec3(geo_in[0].sampleDensity[3],geo_in[0].sampleDensity[4],geo_in[0].sampleDensity[5]);
-	EmitVertex();
-	outValue = vec3(geo_in[0].sampleDensity[6],geo_in[0].sampleDensity[7],-1.f);
-	EmitVertex();
-	EndPrimitive();
-#endif
-
-#if 0
-	float mc_case = geo_in[0].mc_case;
-	vec3 mcvec = vec3(mc_case,mc_case,mc_case);
-	outValue = mcvec;
-	EmitVertex();
-	outValue = mcvec;
-	EmitVertex();
-	outValue = mcvec;
-	EmitVertex();
-	EndPrimitive();
-#endif
-
-
 	vec3 verticesOnEdge[12];
 	int isoLevel = 0;
 	
@@ -108,13 +110,16 @@ void main()
 		vec3 pos2 = verticesOnEdge[triTable[geo_in[0].mc_case].tris[i+1]];
 		vec3 pos3 = verticesOnEdge[triTable[geo_in[0].mc_case].tris[i+2]];
 		
-		outValue = pos1;
+		geo_out.position = pos1;
+		//geo_out.normal = texture(normalAmbientTex, pos1).xyz;
 		EmitVertex();
 		
-		outValue = pos2;
+		geo_out.position = pos2;
+		//geo_out.normal = texture(normalAmbientTex, pos2).xyz;
 		EmitVertex();
 		
-		outValue = pos3;
+		geo_out.position = pos3;
+		//geo_out.normal = texture(normalAmbientTex, pos3).xyz;
 		EmitVertex();
 		
 		EndPrimitive();		

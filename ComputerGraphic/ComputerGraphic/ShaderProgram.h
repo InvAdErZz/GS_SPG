@@ -39,10 +39,19 @@ public:
 	void SetIntUniform(int value, const std::string & UniformName);
 	void SetFloatUniform(float value, const std::string& UniformName);
 	void SetSamplerTextureUnit(GLint textureUnit, const std::string UniformName);
-	void SetTranformFeedback();
+
+	template<int arraySize>
+	void SetTranformFeedback(const char*(&data)[arraySize]);
 
 private:
 	std::vector<Shader> m_shaders;
 
 	std::unordered_map<std::string, GLuint> m_uniformLocations;
 };
+
+template<int arraySize>
+void inline ShaderProgram::SetTranformFeedback(const char*(&data)[arraySize])
+{
+	Resource::IsValid();
+	glTransformFeedbackVaryings(GetHandle(), arraySize, data, GL_INTERLEAVED_ATTRIBS);
+}

@@ -6,6 +6,15 @@
 #include "LookupBuffer.h"
 #include "Texture3d.h"
 
+struct ProceduralMeshVertex
+{
+	static constexpr int PositionLocation = 0;
+	static constexpr int NormalLocation = 0;
+
+	glm::vec3 position;
+	//glm::vec3 normal;
+};
+
 class ProceduralMesh
 {
 public:

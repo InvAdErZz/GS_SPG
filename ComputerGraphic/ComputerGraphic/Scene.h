@@ -41,9 +41,6 @@ private:
 	void UpdateFreeMovement(float deltaTime, const InputManager& inputManager);
 	void UpdatePathFollowing(float deltaTime, const InputManager& inputManager);
 
-	void DensityPass();
-	void GenerateRockFromDensity();
-	void RenderRock();
 	void ShadowMapPass(int LightIndex);
 	void RenderScenePass();
 	void PostProcessPass();
@@ -58,6 +55,7 @@ private:
 	ShaderProgram m_program;
 	ShaderProgram m_shadowMapProgram;
 	ShaderProgram m_postProcessProgram;
+	ShaderProgram m_rockShaderProgram;
 
 	FrameBuffer m_framebuffer;
 	FrameBuffer m_msaaFrameBuffer;

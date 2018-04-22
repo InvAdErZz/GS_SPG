@@ -108,7 +108,7 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 
 			densityFrameBuffer.BindTexture3D(GL_COLOR_ATTACHMENT0, desityTexture.GetHandle(), 0, i);
 			
-			densityShader.SetFloatUniform(++test, HIGHT_UNIFORM_NAME);
+			densityShader.SetFloatUniform(i, HIGHT_UNIFORM_NAME);
 			
 			glClear(GL_COLOR_BUFFER_BIT);
 			ASSERT_GL_ERROR_MACRO();
@@ -231,7 +231,7 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 		glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(GLfloat) * numRockFloats, feedback);
 		for (int i = 0; i < numRockFloats; i+=9)
 		{
-			if (i % 900 != 0)
+			if (i % 9000 != 0)
 			{
 				continue;
 			}
@@ -247,5 +247,16 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 
 void ProceduralMesh::Render()
 {
+	VertexArray renderVao;
+	renderVao.Create();
+	renderVao.Bind();
+	renderVao.EnableAttribute(0);
 
+	m_rockVertices.Bind();
+	m_rockVertices.SetVertexAttributePtr(0, glm::vec3::length(), GL_FLOAT, sizeof(glm::vec3), 0);
+	glDisable(GL_CULL_FACE);
+	glDrawArrays(GL_TRIANGLES, 0, m_numRockTriangles * 3);
+	glEnable(GL_CULL_FACE);
+	m_rockVertices.Unbind();
+	renderVao.Unbind();
 }

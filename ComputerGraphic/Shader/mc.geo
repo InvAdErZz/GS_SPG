@@ -48,29 +48,29 @@ vec3 VertexInterp(float isolevel,vec3 p1,vec3 p2, float density1, float density2
 }
 void main()
 {
-
-	float mc_case = geo_in[0].mc_case;
-	vec3 mcvec = vec3(mc_case,mc_case,mc_case);
-	
-	outValue = mcvec;
-	outValue = geo_in[0].samplePositions[0];
+#if 0
 	outValue = vec3(geo_in[0].sampleDensity[0],geo_in[0].sampleDensity[1], geo_in[0].sampleDensity[2]);
-	
 	EmitVertex();
-	
-	outValue =  mcvec;
-	outValue = geo_in[0].samplePositions[0];
 	outValue = vec3(geo_in[0].sampleDensity[3],geo_in[0].sampleDensity[4],geo_in[0].sampleDensity[5]);
 	EmitVertex();
-	
-	outValue =mcvec;
 	outValue = vec3(geo_in[0].sampleDensity[6],geo_in[0].sampleDensity[7],-1.f);
-
-	//outValue = vec3(-1.f,-1.f,-1.f);
 	EmitVertex();
 	EndPrimitive();
+#endif
 
-return;
+#if 0
+	float mc_case = geo_in[0].mc_case;
+	vec3 mcvec = vec3(mc_case,mc_case,mc_case);
+	outValue = mcvec;
+	EmitVertex();
+	outValue = mcvec;
+	EmitVertex();
+	outValue = mcvec;
+	EmitVertex();
+	EndPrimitive();
+#endif
+
+
 	vec3 verticesOnEdge[12];
 	int isoLevel = 0;
 	

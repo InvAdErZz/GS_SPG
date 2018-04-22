@@ -49,29 +49,6 @@ void main(void) {
 						uint(vs_out.sampleDensity[4] > 0) << 4 |
 						uint(vs_out.sampleDensity[5] > 0) << 5 |
 						uint(vs_out.sampleDensity[6] > 0) << 6 |
-						uint(vs_out.sampleDensity[7] > 0) << 7 ;
-	
-	/*
-	#if 1	
-	vs_out.sampleDensity[0] =  texture(densityTex, vs_out.samplePositions[0]).r;
-	vs_out.sampleDensity[1] =  texture(densityTex, vs_out.samplePositions[1]).r;
-	vs_out.sampleDensity[2] =  texture(densityTex, vs_out.samplePositions[2]).r;
-	vs_out.sampleDensity[3] =  texture(densityTex, vs_out.samplePositions[3]).r;	
-	vs_out.sampleDensity[4] =  texture(densityTex, vs_out.samplePositions[4]).r;
-	vs_out.sampleDensity[5] =  texture(densityTex, vs_out.samplePositions[5]).r;
-	vs_out.sampleDensity[6] =  texture(densityTex, vs_out.samplePositions[6]).r;
-	vs_out.sampleDensity[7] =  texture(densityTex, vs_out.samplePositions[7]).r;	
-	#else
-	vs_out.sampleDensity[0] =  1.f;
-	vs_out.sampleDensity[1] =  2.f;
-	vs_out.sampleDensity[2] =  3.f;
-	vs_out.sampleDensity[3] =  4.f;
-	vs_out.sampleDensity[4] =  5.f;
-	vs_out.sampleDensity[5] =  6.f;
-	vs_out.sampleDensity[6] = 7.f;
-	vs_out.sampleDensity[7] = 	8.f;
-	#endif
-	*/
-	
+						uint(vs_out.sampleDensity[7] > 0) << 7 ;	
 	
 }

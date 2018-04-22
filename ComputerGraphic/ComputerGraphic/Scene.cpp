@@ -85,6 +85,20 @@ namespace
 void Scene::Init(const glm::ivec2& ViewPort)
 {
 	m_viewPort = ViewPort;
+
+	if (!m_rockShaderProgram.CreateShaders("../Shader/rock.vert", "../Shader/rock.frag"))
+	{
+		assert(false);
+	}
+	m_rockShaderProgram.BindAttributeLocation(0, VertextAttribute::POSITION_ATTRIBUTE_NAME);
+
+	m_rockShaderProgram.LinkShaders();
+	m_rockShaderProgram.FindUniforms({
+		VIEW_PROJECTION_UNIFORM_NAME,
+		MODEL_MATRIX_UNIFORM_NAME,
+		});
+
+
 	if (!m_program.CreateShaders("../Shader/shader.vert", "../Shader/shader.frag"))
 	{
 		assert(false);
@@ -600,6 +614,14 @@ void Scene::RenderScenePass()
 		m_program.SetVec4Uniform(cubeData.color, COLOR_UNIFORM_NAME);
 		m_cubeMesh.Render();
 	}
+
+	m_rockShaderProgram.UseProgram();
+	m_rockShaderProgram.SetMatrixUniform(glm::mat4(1.f), MODEL_MATRIX_UNIFORM_NAME);
+	m_rockShaderProgram.SetMatrixUniform(viewProjection, VIEW_PROJECTION_UNIFORM_NAME);
+	m_rock.Render();
+
+	m_rockShaderProgram.UnuseProgram();
+
 
 	if (m_allowedSampleSizes[m_sampleIndex] > 1)
 	{

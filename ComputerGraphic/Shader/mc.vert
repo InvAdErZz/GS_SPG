@@ -11,9 +11,6 @@ out VS_OUT
 
 
 uniform float worldSpaceVoxelSize = 1.f;
-uniform float inversedNumLayers;
-uniform vec3 inversedTexture3dDimensions;
-
 
 uniform sampler3D densityTex;
 

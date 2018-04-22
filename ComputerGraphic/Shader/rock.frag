@@ -30,6 +30,7 @@ void main(void) {
     totalLight += spec;
 	
 	
-	vec3 ex_Color = vec3(1,1,1);	
+	vec3 ex_Color = vec3(1,1,1);
 	color = ex_Color.xyz * totalLight;
+	//color = normalize(vec3(1,1,1) + norm);
 }

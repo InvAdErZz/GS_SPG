@@ -58,6 +58,8 @@ vec3 VertexInterp(float isolevel,vec3 p1,vec3 p2, float density1, float density2
 }
 vec3 CalcNormal(vec3 texspace)
 {
+	//return texture(normalAmbientTex, texspace);;
+
 	vec4 step = vec4(inversedTexture3dDimensions, 0);
 	vec3 gradient = vec3(
 		texture(densityTex, texspace + step.xww).r - texture(densityTex, texspace - step.xww ).r,
@@ -111,15 +113,15 @@ void main()
 		vec3 pos3 = verticesOnEdge[triTable[geo_in[0].mc_case].tris[i+2]];
 		
 		geo_out.position = pos1;
-		geo_out.normal = texture(normalAmbientTex, pos1).xyz;
+		geo_out.normal = CalcNormal( pos1);
 		EmitVertex();
 		
 		geo_out.position = pos2;
-		geo_out.normal = texture(normalAmbientTex, pos2).xyz;
+		geo_out.normal = CalcNormal( pos2);
 		EmitVertex();
 		
 		geo_out.position = pos3;
-		geo_out.normal = texture(normalAmbientTex, pos3).xyz;
+		geo_out.normal = CalcNormal( pos3);
 		EmitVertex();
 		
 		EndPrimitive();		

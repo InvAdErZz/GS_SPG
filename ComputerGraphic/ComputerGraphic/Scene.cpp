@@ -306,11 +306,13 @@ void Scene::Update(float deltaTime, const InputManager& inputManager)
 	{
 		m_rockBaseDensity = std::min(1.0f, m_rockBaseDensity + 0.05f);
 		m_rock.GenerateMesh(m_mcLookup, m_rockBaseDensity);
+		printf("Base Density is now: %f\n", m_rockBaseDensity);
 	}
 	if (inputManager.GetKey(KeyCode::MINUS).GetNumPressed() > 0)
 	{
 		m_rockBaseDensity = std::max(-1.0f, m_rockBaseDensity - 0.05f);
 		m_rock.GenerateMesh(m_mcLookup, m_rockBaseDensity);
+		printf("Base Density is now: %f\n", m_rockBaseDensity);
 	}
 
 	if (m_path.IsFollowingPath())

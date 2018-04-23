@@ -642,7 +642,7 @@ void Scene::RenderScenePass()
 
 	m_rockShaderProgram.UseProgram();
 
-	const glm::mat4 rockModelMat = glm::scale(glm::vec3(10.f, 10.f, 10.f));
+	const glm::mat4 rockModelMat = glm::rotate(glm::radians(-90.f), glm::vec3(1.f,0.f,0.f)) * glm::scale(glm::vec3(5.f, 5.f, 20.f));
 	m_rockShaderProgram.SetMatrixUniform(rockModelMat, MODEL_MATRIX_UNIFORM_NAME);
 
 	const glm::mat4 invTranspRockModelMat = glm::transpose(glm::inverse(rockModelMat));

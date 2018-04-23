@@ -57,8 +57,8 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 	desityTexture.Create();
 	desityTexture.Bind();
 	desityTexture.TextureImage(0, GL_R32F, Texture3dDimensions.x, Texture3dDimensions.y, Texture3dDimensions.z, GL_RED, GL_FLOAT, nullptr);
-	desityTexture.SetNearestNeighbourFiltering();
-
+	desityTexture.SetLinearFiltering();
+	
 	// Fill Density Texture
 	{
 		ShaderProgram densityShader;

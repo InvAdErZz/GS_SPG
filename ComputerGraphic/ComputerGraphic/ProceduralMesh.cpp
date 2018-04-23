@@ -6,7 +6,7 @@
 namespace
 {
 	
-	constexpr glm::ivec3 Texture3dDimensions(96, 96, 256);
+	constexpr glm::ivec3 Texture3dDimensions(96 , 96 , 256);
 	constexpr glm::ivec3 Texture3dDimensionsMinOne(Texture3dDimensions.x - 1, Texture3dDimensions.y - 1, Texture3dDimensions.z - 1);
 	constexpr glm::vec3 Inversed3dDimensions(1.f / Texture3dDimensions.x, 1.f / Texture3dDimensions.y, 1.f / Texture3dDimensions.z);
 	constexpr int Texture3dNumSamples = Texture3dDimensions.x * Texture3dDimensions.y * Texture3dDimensions.z;
@@ -79,7 +79,7 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 
 		glViewport(0, 0, Texture3dDimensions.x, Texture3dDimensions.y);
 	
-		for (size_t i = 0; i < 256; i++)
+		for (size_t i = 0; i < Texture3dDimensions.z; i++)
 		{
 
 			densityFrameBuffer.BindTexture3D(GL_COLOR_ATTACHMENT0, desityTexture.GetHandle(), 0, i);
@@ -129,7 +129,7 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 
 		glViewport(0, 0, Texture3dDimensions.x, Texture3dDimensions.y);
 
-		for (size_t i = 0; i < 256; i++)
+		for (size_t i = 0; i < Texture3dDimensions.z; i++)
 		{
 			normalAmbientFramebuffer.BindTexture3D(GL_COLOR_ATTACHMENT0, normalAmbientTexture.GetHandle(), 0, i);
 			normalAmbientShader.SetFloatUniform(i * Inversed3dDimensions.z, HIGHT_UNIFORM_NAME);

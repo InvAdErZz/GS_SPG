@@ -68,7 +68,7 @@ vec3 CalcNormal(vec3 texspace)
 		texture(densityTex, texspace + step.wwz).r - texture(densityTex, texspace - step.wwz ).r
 		);
 		
-	vec3 normalVec = normalize(-gradient);
+	vec3 normalVec = normalize(gradient);
 	return normalVec;
 }
 	

@@ -300,9 +300,8 @@ void ProceduralMesh::Render()
 	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::TexcoordLocation, decltype(ProceduralMeshVertex::texcoord)::length(),
 		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, texcoord));
 
-	glDisable(GL_CULL_FACE);
 	glDrawArrays(GL_TRIANGLES, 0, m_numRockTriangles * 3);
-	glEnable(GL_CULL_FACE);
+
 	m_rockVertices.Unbind();
 	renderVao.Unbind();
 }

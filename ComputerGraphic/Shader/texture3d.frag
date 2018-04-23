@@ -79,7 +79,7 @@ float calcHelixVal(float frequency, float minVal, float maxVal)
 
 void main(void) {
 	
-	float density = 0.0;
+	float density = 0.5;
 	
 	
 	// bounds. The further away from the centerer the more gets substracted
@@ -101,11 +101,13 @@ void main(void) {
 	//density -=  pow( length(frag_in.worldSpace.xy), 4 );
 	
 	// close holes top / bottom negative density
-	if(abs(0.5 - frag_in.worldSpace.z) > 0.49)
-	{
-		density -= 100;
-	}
+	density -= max(abs(0.5 - frag_in.worldSpace.z) - 0.49,0) * 3000;
 	
+	// close hole on the sides
+	density -= max(abs(frag_in.worldSpace.x) - 0.98,0) * 3000;
+	density -= max(abs(frag_in.worldSpace.y) - 0.98,0) * 3000;
+
+
 	finalDensity = density ;
 	
 }

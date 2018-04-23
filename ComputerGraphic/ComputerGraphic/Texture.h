@@ -14,6 +14,7 @@ public:
 	void Bind();
 	void TextureImage(GLint levelOfDetail, GLint internalFormat, GLsizei width, GLsizei heigth, GLenum format, GLenum pixelDataType, const void* imageData);
 	void SetNearestNeighbourFiltering();
+	void SetLinearFiltering();
 	void SetClampToEdge();
 
 	void SetClampBorder(glm::vec4 borderColor);
@@ -77,6 +78,16 @@ inline void Texture::SetNearestNeighbourFiltering()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	ASSERT_GL_ERROR_MACRO();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	ASSERT_GL_ERROR_MACRO();
+
+}
+
+inline void Texture::SetLinearFiltering()
+{
+	assert(IsBound());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	ASSERT_GL_ERROR_MACRO();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	ASSERT_GL_ERROR_MACRO();
 
 }

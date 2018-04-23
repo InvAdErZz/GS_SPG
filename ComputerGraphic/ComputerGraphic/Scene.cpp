@@ -116,7 +116,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 		m_rockTexture.Create();
 		m_rockTexture.Bind();
 		m_rockTexture.TextureImage(0, GL_RGB, rockImage.GetWidth(), rockImage.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, rockImage.GetData());
-		m_rockTexture.SetNearestNeighbourFiltering();
+		m_rockTexture.SetLinearFiltering();
 		m_rockTexture.SetRepeating();
 		m_rockTexture.Unbind();
 	}

@@ -125,7 +125,7 @@ void main()
 		
 		geo_out.position = pos3;
 		geo_out.normal = CalcNormal( pos3);
-		geo_out.texcoord = pos2.xy;
+		geo_out.texcoord = pos3.xy;
 		EmitVertex();
 		
 		EndPrimitive();		

@@ -33,7 +33,7 @@ void main(void) {
     totalLight += spec;
 	
 	
-	vec3 ex_Color = texture(rockTex, frag_in.texCoord / 10).xyz;
+	vec3 ex_Color = texture(rockTex, frag_in.texCoord).xyz;
 	color = ex_Color.xyz * totalLight;
 	//color = normalize(vec3(1,1,1) + norm);
 }

@@ -84,7 +84,7 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 
 			densityFrameBuffer.BindTexture3D(GL_COLOR_ATTACHMENT0, desityTexture.GetHandle(), 0, i);
 			
-			densityShader.SetFloatUniform(i, HIGHT_UNIFORM_NAME);
+			densityShader.SetFloatUniform(i * Inversed3dDimensions.z, HIGHT_UNIFORM_NAME);
 			
 			// we don't need a vbo or vao as we don't need any inputdata. We are just drawing a screen triangle. Look inside shader for more.
 			glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -301,7 +301,6 @@ void ProceduralMesh::Render()
 		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, texcoord));
 
 	glDrawArrays(GL_TRIANGLES, 0, m_numRockTriangles * 3);
-
 	m_rockVertices.Unbind();
 	renderVao.Unbind();
 }

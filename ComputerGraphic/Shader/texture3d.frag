@@ -11,7 +11,7 @@ in VS_OUT
 
 
 
-
+uniform float baseDensity = 0;
 
 
 const int numPillars = 3;
@@ -79,7 +79,7 @@ float calcHelixVal(float frequency, float minVal, float maxVal)
 
 void main(void) {
 	
-	float density = 0.5;
+	float density = baseDensity;
 	
 	
 	// bounds. The further away from the centerer the more gets substracted

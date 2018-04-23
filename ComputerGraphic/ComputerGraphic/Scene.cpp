@@ -295,11 +295,24 @@ void Scene::Init(const glm::ivec2& ViewPort)
 
 	m_allowedSampleSizes = Texture2DMultisample::FindSupportedSampleSizes(m_viewPort);
 	m_mcLookup.WriteLookupTablesToGpu();
-	m_rock.GenerateMesh(m_mcLookup);
+	m_rock.Init();
+	m_rock.GenerateMesh(m_mcLookup,0.f);
 }
 
 void Scene::Update(float deltaTime, const InputManager& inputManager)
 {
+	
+	if (inputManager.GetKey(KeyCode::PLUS).GetNumPressed() > 0)
+	{
+		m_rockBaseDensity = std::min(1.0f, m_rockBaseDensity + 0.05f);
+		m_rock.GenerateMesh(m_mcLookup, m_rockBaseDensity);
+	}
+	if (inputManager.GetKey(KeyCode::MINUS).GetNumPressed() > 0)
+	{
+		m_rockBaseDensity = std::max(-1.0f, m_rockBaseDensity - 0.05f);
+		m_rock.GenerateMesh(m_mcLookup, m_rockBaseDensity);
+	}
+
 	if (m_path.IsFollowingPath())
 	{
 		UpdatePathFollowing(deltaTime, inputManager);
@@ -397,14 +410,14 @@ void Scene::UpdateFreeMovement(float deltaTime, const InputManager & inputManage
 		}
 	}
 
-	if (inputManager.GetKey(KeyCode::PLUS).IsPressed())
+	/*if (inputManager.GetKey(KeyCode::PLUS).IsPressed())
 	{
 		m_currentRoughness = std::min(1.0f, m_currentRoughness + 0.05f);
 	}
 	if (inputManager.GetKey(KeyCode::MINUS).IsPressed())
 	{
 		m_currentRoughness = std::max(0.0f, m_currentRoughness - 0.05f);
-	}
+	}*/
 
 	if (inputManager.GetKey(KeyCode::KEY_E).GetNumPressed() > 0)
 	{

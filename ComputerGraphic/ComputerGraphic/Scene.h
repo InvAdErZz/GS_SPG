@@ -81,5 +81,7 @@ private:
 	float m_currentRoughness = 0.5f;
 	bool m_msaaFixedSamples = false;
 	int m_sampleIndex = 0;
+	float m_rockBaseDensity = 0.f;
+
 	std::vector<GLsizei> m_allowedSampleSizes;
 };

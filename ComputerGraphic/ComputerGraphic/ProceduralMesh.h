@@ -26,8 +26,9 @@ class ProceduralMesh
 public:
 	ProceduralMesh():m_numRockTriangles(0){}
 	void Init();
-	void GenerateMesh(const LookupBuffer& lookupBuffer);
+	void GenerateMesh(const LookupBuffer& lookupBuffer, float baseDensity);
 	void Render();
+	VertexArray emptyVao;
 
 	AttributeBuffer m_rockVertices;
 	VertexArray m_rockVao;

@@ -67,27 +67,38 @@ float calcShelfVal(float frequency, float minVal, float maxVal)
 	return result;
 }
 
+float calcHelixVal(float frequency, float minVal, float maxVal)
+{
+	float scaledHight = frag_in.worldSpace.z * 2* pi * frequency;
+	vec2 helixVec = vec2(cos(scaledHight), sin(scaledHight));
+	float normalisedResult =  (dot(helixVec, frag_in.worldSpace.xy) +1) / 2;
+	
+	return (normalisedResult * (maxVal - minVal)) + minVal;
+}
+
 
 void main(void) {
 	
-	float density = 0.2;
+	float density = 0.0;
 	
 	
 	// bounds. The further away from the centerer the more gets substracted
 	density -=  pow( length(frag_in.worldSpace.xy), 2 );
 	
-	density += calcShelfVal(2, 0.6, 1);
+	density += calcShelfVal(4, -0.3, 0.3);
 	
 	for(int i = 0; i < numPillars; ++i)
 	{
 		density += calcPillarVal(pillars[i], 0.2);
 	}	
 	
+	density += calcHelixVal(2, 0, 1);
+	
 	// center hole
 	density -= (1 / (length(frag_in.worldSpace.xy) +1));
 	
 	// bounds. The further away from the centerer the more gets substracted
-	//density -=  pow( length(frag_in.worldSpace.xy), 3 );
+	//density -=  pow( length(frag_in.worldSpace.xy), 4 );
 	
 	// close holes top / bottom negative density
 	if(abs(0.5 - frag_in.worldSpace.z) > 0.49)

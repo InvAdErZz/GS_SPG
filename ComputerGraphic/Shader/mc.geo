@@ -68,7 +68,7 @@ vec3 CalcNormal(vec3 texspace)
 		texture(densityTex, texspace + step.wwz).r - texture(densityTex, texspace - step.wwz ).r
 		);
 		
-	vec3 normalVec = normalize(gradient);
+	vec3 normalVec = normalize(-gradient);
 	return normalVec;
 }
 	
@@ -118,15 +118,17 @@ void main()
 		geo_out.texcoord = pos1.xy;
 		EmitVertex();
 		
+		geo_out.position = pos3;
+		geo_out.normal = CalcNormal( pos3);
+		geo_out.texcoord = pos3.xy;
+		EmitVertex();
+		
 		geo_out.position = pos2;
 		geo_out.normal = CalcNormal( pos2);
 		geo_out.texcoord = pos2.xy;
 		EmitVertex();
 		
-		geo_out.position = pos3;
-		geo_out.normal = CalcNormal( pos3);
-		geo_out.texcoord = pos3.xy;
-		EmitVertex();
+		
 		
 		EndPrimitive();		
 	}

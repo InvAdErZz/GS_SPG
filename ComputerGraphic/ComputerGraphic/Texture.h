@@ -17,6 +17,7 @@ public:
 	void SetClampToEdge();
 
 	void SetClampBorder(glm::vec4 borderColor);
+	void SetRepeating();
 	void BindToTextureUnit(GLuint textureUnit);
 
 	static void Unbind();
@@ -99,6 +100,16 @@ inline void Texture::SetClampBorder(glm::vec4 borderColor)
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(borderColor));
 	ASSERT_GL_ERROR_MACRO();		
 }
+
+inline void Texture::SetRepeating()
+{
+	assert(IsBound());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	ASSERT_GL_ERROR_MACRO();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	ASSERT_GL_ERROR_MACRO();
+}
+
 
 inline void Texture::BindToTextureUnit(GLuint textureUnit)
 {

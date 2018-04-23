@@ -10,12 +10,15 @@ struct ProceduralMeshVertex
 {
 	static constexpr int PositionLocation = 0;
 	static constexpr int NormalLocation = 1;
+	static constexpr int TexcoordLocation = 2;
 
 	static constexpr const char* POSITION_ATTRIBUTE_NAME = "in_Position";
 	static constexpr const char* NORMAL_ATTRIBUTE_NAME = "in_Normal";
+	static constexpr const char* TEXCOORD_ATTRIBUTE_NAME = "in_Texcoord";
 
 	glm::vec3 position;
 	glm::vec3 normal;
+	glm::vec2 texcoord;
 };
 
 class ProceduralMesh

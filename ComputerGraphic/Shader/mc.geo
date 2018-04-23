@@ -34,6 +34,7 @@ struct ProceduralMeshVertex
 {
 	vec3 position;
 	vec3 normal;
+	vec2 texcoord;
 };
 
 
@@ -114,14 +115,17 @@ void main()
 		
 		geo_out.position = pos1;
 		geo_out.normal = CalcNormal( pos1);
+		geo_out.texcoord = pos1.xy;
 		EmitVertex();
 		
 		geo_out.position = pos2;
 		geo_out.normal = CalcNormal( pos2);
+		geo_out.texcoord = pos2.xy;
 		EmitVertex();
 		
 		geo_out.position = pos3;
 		geo_out.normal = CalcNormal( pos3);
+		geo_out.texcoord = pos2.xy;
 		EmitVertex();
 		
 		EndPrimitive();		

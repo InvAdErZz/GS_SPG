@@ -154,8 +154,8 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 	// reserve enough space
 	// 5 triangles 
 	// vertex
-	constexpr int rockBufferbytes = 1024 * 1024 * 10;
-		//Texture3dNumSamples * 5 * 3 * sizeof(ProceduralMeshVertex);
+	// finaly make it a bit smaller
+	constexpr int rockBufferbytes = Texture3dNumSamples * 5 * 3 * sizeof(ProceduralMeshVertex) / 50;
 
 	rockVertexBuffer.AllocateBufferData(rockBufferbytes, GL_STATIC_READ);
 
@@ -170,6 +170,7 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer)
 		const char* tranformFeedbackOutput[] = { 
 			"geo_out.position"
 			, "geo_out.normal" 
+			, "geo_out.texcoord"
 		};
 		marchingCubesShader.SetTranformFeedback(tranformFeedbackOutput);
 
@@ -287,13 +288,17 @@ void ProceduralMesh::Render()
 	renderVao.Bind();
 	renderVao.EnableAttribute(ProceduralMeshVertex::PositionLocation);
 	renderVao.EnableAttribute(ProceduralMeshVertex::NormalLocation);
+	renderVao.EnableAttribute(ProceduralMeshVertex::TexcoordLocation);
 
 	m_rockVertices.Bind();
-	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::PositionLocation, glm::vec3::length(),
+	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::PositionLocation, decltype(ProceduralMeshVertex::position)::length(),
 		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, position));
 
-	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::NormalLocation, glm::vec3::length(),
+	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::NormalLocation, decltype(ProceduralMeshVertex::normal)::length(),
 		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, normal));
+
+	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::TexcoordLocation, decltype(ProceduralMeshVertex::texcoord)::length(),
+		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, texcoord));
 
 	glDisable(GL_CULL_FACE);
 	glDrawArrays(GL_TRIANGLES, 0, m_numRockTriangles * 3);

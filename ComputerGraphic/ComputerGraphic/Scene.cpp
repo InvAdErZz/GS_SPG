@@ -26,6 +26,8 @@ namespace
 	const std::string NORMAL_MAP_UNIFORM_NAME("normalMap");
 	const std::string ROUGHNESS_UNIFORM_NAME("roughness");
 
+	const std::string ROCK_TEXTURE_UNIFORM_NAME("rockTex");
+
 
 	const std::array<std::string, Scene::LightCount> SHADOW_MAP_UNIFORM_NAME_ARRAY = []()
 	{
@@ -99,11 +101,24 @@ void Scene::Init(const glm::ivec2& ViewPort)
 		MODEL_MATRIX_UNIFORM_NAME,
 		INVERSE_TRANSPOSED_MODEL_MATRIX_UNIFORM_NAME,
 		CAMERA_POS_UNIFORM_NAME,
+		ROCK_TEXTURE_UNIFORM_NAME,
 		});
 
 	for (int i = 0; i < LightCount; ++i)
 	{
 		m_rockShaderProgram.FindUniform(LIGHT_POS_UNIFORM_NAME_ARRAY[i]);
+	}
+	{
+		Image rockImage;
+		rockImage.LoadImage("../Textures/rock.jpg");
+		assert(rockImage.GetNumberChannels() == 3);
+
+		m_rockTexture.Create();
+		m_rockTexture.Bind();
+		m_rockTexture.TextureImage(0, GL_RGB, rockImage.GetWidth(), rockImage.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, rockImage.GetData());
+		m_rockTexture.SetNearestNeighbourFiltering();
+		m_rockTexture.SetRepeating();
+		m_rockTexture.Unbind();
 	}
 
 
@@ -632,6 +647,9 @@ void Scene::RenderScenePass()
 
 	const glm::mat4 invTranspRockModelMat = glm::transpose(glm::inverse(rockModelMat));
 	m_rockShaderProgram.SetMatrixUniform(invTranspRockModelMat, INVERSE_TRANSPOSED_MODEL_MATRIX_UNIFORM_NAME);
+
+	m_rockShaderProgram.SetSamplerTextureUnit(0, ROCK_TEXTURE_UNIFORM_NAME);
+	m_rockTexture.BindToTextureUnit(0);
 	
 	m_rockShaderProgram.SetMatrixUniform(viewProjection, VIEW_PROJECTION_UNIFORM_NAME);
 	m_rockShaderProgram.SetVec3Uniform(m_camera.m_position, CAMERA_POS_UNIFORM_NAME);

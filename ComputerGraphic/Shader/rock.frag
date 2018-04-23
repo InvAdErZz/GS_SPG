@@ -6,11 +6,14 @@ const int maxLights = 2;
 
 uniform vec3 cameraPos;
 uniform vec3 lightPos[maxLights];
+
+uniform sampler2D rockTex;
  
 in VS_OUT
 {
 	vec3 wsPosition;
 	vec3 wsNormal;
+	vec2 texCoord;
 } frag_in;
  
 out vec3 color;
@@ -30,7 +33,7 @@ void main(void) {
     totalLight += spec;
 	
 	
-	vec3 ex_Color = vec3(1,1,1);
+	vec3 ex_Color = texture(rockTex, frag_in.texCoord / 10).xyz;
 	color = ex_Color.xyz * totalLight;
 	//color = normalize(vec3(1,1,1) + norm);
 }

@@ -16,9 +16,9 @@ void main(void) {
 	density +=  cos(height) * 10;
 	*/
 	
-	float density = -8;
+	float density = -7;
 	density += cos(frag_in.worldSpace.z/ 10);
-	density += 10 / (length(vec2(0.5,0.5) - frag_in.worldSpace.xy) + 1);
+	density += 10 / (length(frag_in.worldSpace.xy) + 1);
 	
 	finalDensity = density ;
 	

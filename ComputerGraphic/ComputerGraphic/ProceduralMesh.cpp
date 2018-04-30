@@ -177,6 +177,8 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer, float baseDe
 		const char* tranformFeedbackOutput[] = { 
 			"geo_out.position"
 			, "geo_out.normal" 
+			, "geo_out.tangent"
+			, "geo_out.bitangent"
 			, "geo_out.texcoord"
 		};
 		marchingCubesShader.SetTranformFeedback(tranformFeedbackOutput);
@@ -270,6 +272,12 @@ void ProceduralMesh::Render()
 
 	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::NormalLocation, decltype(ProceduralMeshVertex::normal)::length(),
 		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, normal));
+
+	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::TangentLocation, decltype(ProceduralMeshVertex::tangent)::length(),
+		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, tangent));
+
+	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::BitangentLocation, decltype(ProceduralMeshVertex::bitangent)::length(),
+		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, bitangent));
 
 	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::TexcoordLocation, decltype(ProceduralMeshVertex::texcoord)::length(),
 		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, texcoord));

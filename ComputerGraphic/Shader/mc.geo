@@ -34,6 +34,8 @@ struct ProceduralMeshVertex
 {
 	vec3 position;
 	vec3 normal;
+	vec3 tangent;
+	vec3 bitangent;
 	vec2 texcoord;
 };
 
@@ -106,7 +108,9 @@ void main()
 	if ((edgeflags & 2048) != 0)
 		verticesOnEdge[11] = VertexInterp(isoLevel, geo_in[0].samplePositions[3], geo_in[0].samplePositions[7], geo_in[0].sampleDensity[3], geo_in[0].sampleDensity[7]);
 
-	
+	// just to have some output
+	geo_out.tangent = vec3(0,0,0);
+	geo_out.bitangent = vec3(0,0,0);
 	for (int i = 0; triTable[geo_in[0].mc_case].tris[i] != -1; i += 3)
 	{
 		vec3 pos1 = verticesOnEdge[triTable[geo_in[0].mc_case].tris[i  ]];

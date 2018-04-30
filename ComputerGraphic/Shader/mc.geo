@@ -107,10 +107,8 @@ void main()
 	    verticesOnEdge[10] = VertexInterp(isoLevel, geo_in[0].samplePositions[2], geo_in[0].samplePositions[6], geo_in[0].sampleDensity[2], geo_in[0].sampleDensity[6]);
 	if ((edgeflags & 2048) != 0)
 		verticesOnEdge[11] = VertexInterp(isoLevel, geo_in[0].samplePositions[3], geo_in[0].samplePositions[7], geo_in[0].sampleDensity[3], geo_in[0].sampleDensity[7]);
-
-	// just to have some output
-	geo_out.tangent = vec3(0,0,0);
-	geo_out.bitangent = vec3(0,0,0);
+	
+	vec3 forwardVec = vec3(1,0,0);
 	for (int i = 0; triTable[geo_in[0].mc_case].tris[i] != -1; i += 3)
 	{
 		vec3 pos1 = verticesOnEdge[triTable[geo_in[0].mc_case].tris[i  ]];
@@ -119,16 +117,22 @@ void main()
 		
 		geo_out.position = pos1;
 		geo_out.normal = CalcNormal( pos1);
+		geo_out.tangent = normalize(cross(forwardVec, geo_out.normal));
+		geo_out.bitangent = normalize(cross(geo_out.tangent, geo_out.normal));
 		geo_out.texcoord = pos1.xy;
 		EmitVertex();
 		
 		geo_out.position = pos3;
 		geo_out.normal = CalcNormal( pos3);
+		geo_out.tangent = normalize(cross(forwardVec, geo_out.normal));
+		geo_out.bitangent = normalize(cross(geo_out.tangent, geo_out.normal));
 		geo_out.texcoord = pos3.xy;
 		EmitVertex();
 		
 		geo_out.position = pos2;
 		geo_out.normal = CalcNormal( pos2);
+		geo_out.tangent = normalize(cross(forwardVec, geo_out.normal));
+		geo_out.bitangent = normalize(cross(geo_out.tangent, geo_out.normal));
 		geo_out.texcoord = pos2.xy;
 		EmitVertex();
 		

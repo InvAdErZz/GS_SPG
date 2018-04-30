@@ -177,7 +177,6 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer, float baseDe
 		const char* tranformFeedbackOutput[] = { 
 			"geo_out.position"
 			, "geo_out.normal" 
-			, "geo_out.texcoord"
 		};
 		marchingCubesShader.SetTranformFeedback(tranformFeedbackOutput);
 
@@ -262,7 +261,6 @@ void ProceduralMesh::Render()
 	renderVao.Bind();
 	renderVao.EnableAttribute(ProceduralMeshVertex::PositionLocation);
 	renderVao.EnableAttribute(ProceduralMeshVertex::NormalLocation);
-	renderVao.EnableAttribute(ProceduralMeshVertex::TexcoordLocation);
 
 	m_rockVertices.Bind();
 	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::PositionLocation, decltype(ProceduralMeshVertex::position)::length(),
@@ -271,8 +269,6 @@ void ProceduralMesh::Render()
 	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::NormalLocation, decltype(ProceduralMeshVertex::normal)::length(),
 		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, normal));
 
-	m_rockVertices.SetVertexAttributePtr(ProceduralMeshVertex::TexcoordLocation, decltype(ProceduralMeshVertex::texcoord)::length(),
-		GL_FLOAT, sizeof(ProceduralMeshVertex), offsetof(ProceduralMeshVertex, texcoord));
 	m_rockVertices.Unbind();
 
 	glFlush();

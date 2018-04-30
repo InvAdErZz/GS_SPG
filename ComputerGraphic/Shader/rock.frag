@@ -13,12 +13,14 @@ in VS_OUT
 {
 	vec3 wsPosition;
 	vec3 wsNormal;
-	vec2 texCoord;
+	vec3 uv;
 } frag_in;
  
 out vec3 color;
 
 void main(void) {
+	
+	vec2 uvX = frag_in.uv.yz;
 	
 	float totalLight = 0.1f;
 	
@@ -33,7 +35,7 @@ void main(void) {
     totalLight += spec;
 	
 	
-	vec3 ex_Color = texture(rockTex, frag_in.texCoord).xyz;
+	vec3 ex_Color = texture(rockTex, uvX).xyz;
 	color = ex_Color.xyz * totalLight;
 	//color = normalize(vec3(1,1,1) + norm);
 }

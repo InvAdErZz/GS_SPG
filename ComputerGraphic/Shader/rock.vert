@@ -9,7 +9,7 @@ out VS_OUT
 {
 	vec3 wsPosition;
 	vec3 wsNormal;
-	vec2 texCoord;
+	vec3 uv;
 } vs_out;
 
 uniform mat4 viewProjection;
@@ -22,8 +22,8 @@ uniform vec3 lightPos[maxLights];
 
 void main(void) 
 {
+	vs_out.uv = in_Position;
 	vs_out.wsPosition = (model * vec4(in_Position, 1.0)).xyz;
 	vs_out.wsNormal =  (inverseTransposedModelMat * vec4(in_Normal, 1.0)).xyz;
-	vs_out.texCoord = in_Position.xy;
 	gl_Position = viewProjection *  vec4(vs_out.wsPosition, 1.0);	
 }

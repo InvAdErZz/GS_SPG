@@ -26,68 +26,6 @@ vec3 UnpackNormal(vec3 textureNormal)
 	return normal;
 }
 
-vec2 Parallax2(sampler2D map, vec2 texCoords, vec3 viewDir)
-{
-	int displacement_initialSteps = 8;
-	int displacement_refinementSteps = 8;
-	float displacement_scale = 0.025f;
-	displacement_scale = 1.f;
-    // calculate the size of each layer
-    float layerDepth = 1.0 / displacement_initialSteps;
-    // depth of current layer
-    float currentLayerDepth = 0.0;
-    // the amount to shift the texture coordinates per layer (from vector P)
-    vec2 P = vec2(viewDir.x, -viewDir.y) / viewDir.z * displacement_scale;
-    vec2 deltaTexCoords = P / displacement_initialSteps;
-
-    // get initial values
-    vec2  currentTexCoords     = texCoords;
-    float currentDepthMapValue = texture(map, currentTexCoords).r;
-
- 	while(currentLayerDepth < currentDepthMapValue)
-    {
-        // shift texture coordinates along direction of P
-        currentTexCoords -= deltaTexCoords;
-        // get depthmap value at current texture coordinates
-        currentDepthMapValue = texture(map, currentTexCoords).r;
-        // get depth of next layer
-        currentLayerDepth += layerDepth;
-    }
-
-    currentTexCoords += deltaTexCoords;
-    currentDepthMapValue = texture(map, currentTexCoords).r;
-    currentLayerDepth -= layerDepth;
-	currentLayerDepth -= 0.085f; //reduces artifacts
-
-	// decrease the step size as we do the refinement steps
-	deltaTexCoords /= displacement_refinementSteps;
-	layerDepth /= displacement_refinementSteps;
-
- 	while(currentLayerDepth < currentDepthMapValue)
-    {
-        // shift texture coordinates along direction of P
-        currentTexCoords -= deltaTexCoords;
-        // get depthmap value at current texture coordinates
-        currentDepthMapValue = texture(map, currentTexCoords).r;
-        // get depth of next layer
-        currentLayerDepth += layerDepth;
-    }
-
-    // get texture coordinates before collision (reverse operations)
-    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
-	float prevLayerDepth = currentLayerDepth - layerDepth;
-
-    // get depth after and before collision for linear interpolation
-    float afterDepth  = currentDepthMapValue - currentLayerDepth;
-    float beforeDepth = texture(map, prevTexCoords).r - prevLayerDepth;
-
-    // interpolation of texture coordinates
-    float weight = afterDepth / (afterDepth - beforeDepth);
-    vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
-
-    return finalTexCoords;
-}
-
 vec2 Paralax(vec3 viewTS, vec2 uv)
 {
 	viewTS = normalize(viewTS);
@@ -125,6 +63,8 @@ vec2 Paralax(vec3 viewTS, vec2 uv)
 		}
 	}
 	
+	return currentTexCoords - offsetPerLayer/2;
+	
 #if 0
 	// now we have our layer is lower than our current Depth
 	// we will now reverse back wiht refinement steps until this is no longer true	
@@ -154,7 +94,7 @@ void main(void) {
 	float powValue = 5;
 	vec3 powVec = vec3(powValue,powValue,powValue);
 	vec3 normalizedWsNormal = normalize(frag_in.wsNormal);
-	vec3 viewDir = normalize(cameraPos - normalizedWsNormal);
+	vec3 viewDir = normalize(cameraPos - frag_in.wsPosition);
 	
 	vec3 blendfactor = pow(abs(normalizedWsNormal), powVec);
 
@@ -184,11 +124,7 @@ void main(void) {
 	viewTsY.z *= viewAxisSign.y;
 	viewTsZ.z *= viewAxisSign.z;
 #endif 
-#if 0
-	uvX = Parallax2(dispTex, uvX, viewTsX);
-	uvY = Parallax2(dispTex, uvY, viewTsY);
-	uvZ = Parallax2(dispTex, uvZ, viewTsZ);
-#endif
+
 #if 1
 	uvX = Paralax(viewTsX, uvX);
 	
@@ -215,7 +151,7 @@ void main(void) {
 		tsNormZ.xyz * blendfactor.z
 	);
 	
-	float totalLight = 0.1f;
+	float totalLight = 0.2f;
 
     vec3 lightDir = normalize(lightPos[0] - frag_in.wsPosition);
     float diff = max(dot(finalNormal, lightDir), 0.0);
@@ -230,7 +166,9 @@ void main(void) {
 	vec3 ex_Color =
 		texture(colorTex, uvX).xyz * blendfactor.x +
 		texture(colorTex, uvY).xyz * blendfactor.y +
-		texture(colorTex, uvZ).xyz * blendfactor.z ;
+		texture(colorTex, uvZ).xyz * blendfactor.z 
+		//+ blendfactor
+		;
 
 
 	color = ex_Color.xyz * totalLight;

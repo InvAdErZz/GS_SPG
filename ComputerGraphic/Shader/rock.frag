@@ -10,6 +10,10 @@ uniform vec3 lightPos[maxLights];
 uniform sampler2D colorTex;
 uniform sampler2D normalTex;
 uniform sampler2D dispTex;
+
+uniform	int numLayers = 2;
+uniform int numRefinementLayers = 2;
+uniform float dispHeight = 0.0625;
  
 in VS_OUT
 {
@@ -29,23 +33,17 @@ vec3 UnpackNormal(vec3 textureNormal)
 vec2 Paralax(vec3 viewTS, vec2 uv)
 {
 	viewTS = normalize(viewTS);
-	int numLayers = 5;
-	int numRefinementLayers = 5;
+
 	float layerStep = 1.f / numLayers;
 	float refinementLayerStep = layerStep / numRefinementLayers;
 
-	float heightScale = 0.1f;
-	heightScale = 0.025f;
-	vec2 maxOffset = (viewTS.xy / viewTS.z) * heightScale;
+	vec2 maxOffset = (viewTS.xy / viewTS.z) * dispHeight;
 	vec2 offsetPerLayer = maxOffset * layerStep;
 	vec2 offsetPerRefinementLayer = maxOffset * refinementLayerStep;
 
 	vec2 currentTexCoords = uv;
 	float currentLayerZ = 1.0f;
 	float currentDispZ = texture(dispTex, currentTexCoords).r;
-	
-	float displaceAmount = 1- currentDispZ;
-	//return uv + maxOffset * displaceAmount;
 	
 	for(int i = 0; i < numLayers; ++i)
 	{
@@ -96,6 +94,7 @@ void main(void) {
 	blendfactor = max(vec3(0), blendfactor);
 
 	blendfactor /= dot(blendfactor, vec3(1));
+	blendfactor = vec3(0,1,0);
 
 	vec2 uvX = frag_in.uv.yz;
 	vec2 uvY = frag_in.uv.xz;

@@ -86,5 +86,9 @@ private:
 	int m_sampleIndex = 0;
 	float m_rockBaseDensity = 0.f;
 
+	int m_dispLayers = 2;
+	int m_dispRefinementLayers = 2;
+	float m_dispScale = 0.0625;
+
 	std::vector<GLsizei> m_allowedSampleSizes;
 };

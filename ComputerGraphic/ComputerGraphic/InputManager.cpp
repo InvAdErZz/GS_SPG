@@ -33,6 +33,18 @@ namespace
 			return KeyCode::KEY_3;
 		case SDLK_4:
 			return KeyCode::KEY_4;
+		case SDLK_5:
+			return KeyCode::KEY_5;
+		case SDLK_6:
+			return KeyCode::KEY_6;
+		case SDLK_7:
+			return KeyCode::KEY_7;
+		case SDLK_8:
+			return KeyCode::KEY_8;
+		case SDLK_9:
+			return KeyCode::KEY_9;
+		case SDLK_0:
+			return KeyCode::KEY_0;
 		case SDLK_SPACE:
 			return KeyCode::KEY_SPACE;
 		

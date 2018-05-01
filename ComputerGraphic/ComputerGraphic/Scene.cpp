@@ -30,6 +30,12 @@ namespace
 	const std::string NORMAL_TEX_UNIFORM_NAME("normalTex");
 	const std::string DISPLACEMENT_TEX_UNIFORM_NAME("dispTex");
 
+	const std::string DISPLACEMENT_LAYERS_UNIFORM_NAME("numLayers");
+	const std::string DISPLACEMENT_REFINEMENT_LAYERS_UNIFORM_NAME("numRefinementLayers");
+	const std::string DISPLACEMENT_HEIGHT_UNIFORM_NAME("dispHeight");
+
+
+
 
 	const std::array<std::string, Scene::LightCount> SHADOW_MAP_UNIFORM_NAME_ARRAY = []()
 	{
@@ -106,6 +112,9 @@ void Scene::Init(const glm::ivec2& ViewPort)
 		COLOR_TEX_UNIFORM_NAME,
 		NORMAL_TEX_UNIFORM_NAME,
 		DISPLACEMENT_TEX_UNIFORM_NAME,
+		DISPLACEMENT_LAYERS_UNIFORM_NAME,
+		DISPLACEMENT_REFINEMENT_LAYERS_UNIFORM_NAME,
+		DISPLACEMENT_HEIGHT_UNIFORM_NAME,
 		});
 
 	for (int i = 0; i < LightCount; ++i)
@@ -232,7 +241,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 
 	m_camera.m_position = { 40.f, 20.f, 0.f };
 	m_camera.m_rotation = glm::angleAxis(0.f, glm::vec3(0, 0, 1));
-	m_camera.SetPerspection(1.f, 1000.f, glm::radians(90.f), glm::vec2(ViewPort));
+	m_camera.SetPerspection(0.01f, 1000.f, glm::radians(90.f), glm::vec2(ViewPort));
 
 
 
@@ -325,6 +334,40 @@ void Scene::Update(float deltaTime, const InputManager& inputManager)
 		m_rockBaseDensity = std::max(-1.0f, m_rockBaseDensity - 0.05f);
 		m_rock.GenerateMesh(m_mcLookup, m_rockBaseDensity);
 		printf("Base Density is now: %f\n", m_rockBaseDensity);
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_5).GetNumPressed() > 0)
+	{
+		m_dispScale = std::min(20.f, m_dispScale * 2);
+		printf("Displacement hight scale: %f\n", m_dispScale);
+	}
+	if (inputManager.GetKey(KeyCode::KEY_6).GetNumPressed() > 0)
+	{
+		m_dispScale = std::max(0.f, m_dispScale / 2);
+		printf("Displacement hight scale: %f\n", m_dispScale);
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_7).GetNumPressed() > 0)
+	{
+		m_dispRefinementLayers = std::min(20, m_dispRefinementLayers + 1);
+		printf("Parallax refinement steps: %d\n", m_dispRefinementLayers);
+	}
+	if (inputManager.GetKey(KeyCode::KEY_8).GetNumPressed() > 0)
+	{
+		m_dispRefinementLayers = std::max(1, m_dispRefinementLayers - 1);
+		printf("Parallax refinement steps: %d\n", m_dispRefinementLayers);
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_9).GetNumPressed() > 0)
+	{
+		m_dispLayers = std::min(20, m_dispLayers + 1);
+		printf("Parallax main steps: %d\n", m_dispLayers);
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_0).GetNumPressed() > 0)
+	{
+		m_dispLayers = std::max(1, m_dispLayers - 1);
+		printf("Parallax main steps: %d\n", m_dispLayers);
 	}
 
 	if (m_path.IsFollowingPath())
@@ -668,6 +711,10 @@ void Scene::RenderScenePass()
 
 
 	m_rockShaderProgram.UseProgram();
+
+	m_rockShaderProgram.SetIntUniform(m_dispLayers, DISPLACEMENT_LAYERS_UNIFORM_NAME);
+	m_rockShaderProgram.SetIntUniform(m_dispRefinementLayers, DISPLACEMENT_REFINEMENT_LAYERS_UNIFORM_NAME);
+	m_rockShaderProgram.SetFloatUniform(m_dispScale, DISPLACEMENT_HEIGHT_UNIFORM_NAME);
 
 	const glm::mat4 rockModelMat = glm::rotate(glm::radians(-90.f), glm::vec3(1.f,0.f,0.f)) * glm::scale(glm::vec3(5.f, 5.f, 20.f));
 	m_rockShaderProgram.SetMatrixUniform(rockModelMat, MODEL_MATRIX_UNIFORM_NAME);

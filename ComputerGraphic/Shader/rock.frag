@@ -34,8 +34,8 @@ vec2 Paralax(vec3 viewTS, vec2 uv)
 	float layerStep = 1.f / numLayers;
 	float refinementLayerStep = layerStep / numRefinementLayers;
 
-	float heightScale = 0.01f;
-	//heightScale = 0.025f;
+	float heightScale = 0.1f;
+	heightScale = 0.025f;
 	vec2 maxOffset = (viewTS.xy / viewTS.z) * heightScale;
 	vec2 offsetPerLayer = maxOffset * layerStep;
 	vec2 offsetPerRefinementLayer = maxOffset * refinementLayerStep;
@@ -63,16 +63,13 @@ vec2 Paralax(vec3 viewTS, vec2 uv)
 		}
 	}
 	
-	return currentTexCoords - offsetPerLayer/2;
-	
-#if 0
 	// now we have our layer is lower than our current Depth
 	// we will now reverse back wiht refinement steps until this is no longer true	
 	for(int i = 0; i < numRefinementLayers; ++i)
 	{
 		if(currentLayerZ < currentDispZ)
 		{
-			currentTexCoords -= offsetPerLayer;
+			currentTexCoords -= offsetPerRefinementLayer;
 			currentLayerZ += layerStep;
 		}
 		
@@ -84,9 +81,8 @@ vec2 Paralax(vec3 viewTS, vec2 uv)
 			currentDispZ = textureVal;
 		}
 	}
-#endif
 	
-	return currentTexCoords;
+	return currentTexCoords + offsetPerRefinementLayer / 2;
 }
 
 
@@ -98,7 +94,6 @@ void main(void) {
 	
 	vec3 blendfactor = pow(abs(normalizedWsNormal), powVec) - 0.1;
 	blendfactor = max(vec3(0), blendfactor);
-	//vec3 blendfactor = pow(abs(normalizedWsNormal) -, powVec);
 
 	blendfactor /= dot(blendfactor, vec3(1));
 
@@ -116,7 +111,7 @@ void main(void) {
 	viewTsY = viewDir.xzy;	
 	viewTsZ = viewDir.xyz;
 	
-#if 0
+#if 1
 	viewTsX.z *= viewAxisSign.x;
 	viewTsY.z *= viewAxisSign.y;
 	viewTsZ.z *= viewAxisSign.z;

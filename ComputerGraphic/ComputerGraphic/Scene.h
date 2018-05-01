@@ -66,7 +66,10 @@ private:
 
 	Texture m_colorTexture;
 	Texture m_depthTexture;
-	Texture m_rockTexture;
+	Texture m_rockColor;
+	Texture m_rockNormal;
+	Texture m_rockDisp;
+
 	std::array<Texture, 3> m_normalMaps;
 
 	std::array<FrameBuffer,LightCount> m_shadowFrameBuffer;

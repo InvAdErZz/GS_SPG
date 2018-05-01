@@ -162,7 +162,7 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer, float baseDe
 	// 5 triangles 
 	// vertex
 	// finaly make it a bit smaller
-	constexpr int rockBufferbytes = Texture3dNumSamples * 5 * 3 * sizeof(ProceduralMeshVertex) / 50;
+	constexpr int rockBufferbytes = Texture3dNumSamples * 5 * 3 * sizeof(ProceduralMeshVertex) / 5;
 
 	rockVertexBuffer.AllocateBufferData(rockBufferbytes, GL_STATIC_COPY);
 

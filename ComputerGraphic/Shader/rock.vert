@@ -22,8 +22,11 @@ uniform vec3 lightPos[maxLights];
 
 void main(void) 
 {
-	vs_out.uv = in_Position;
+	
 	vs_out.wsPosition = (model * vec4(in_Position, 1.0)).xyz;
+
+	vs_out.uv = vs_out.wsPosition;
+
 	vs_out.wsNormal =  (inverseTransposedModelMat * vec4(in_Normal, 1.0)).xyz;
 	gl_Position = viewProjection *  vec4(vs_out.wsPosition, 1.0);	
 }

@@ -26,7 +26,9 @@ namespace
 	const std::string NORMAL_MAP_UNIFORM_NAME("normalMap");
 	const std::string ROUGHNESS_UNIFORM_NAME("roughness");
 
-	const std::string ROCK_TEXTURE_UNIFORM_NAME("rockTex");
+	const std::string COLOR_TEX_UNIFORM_NAME("colorTex");
+	const std::string NORMAL_TEX_UNIFORM_NAME("normalTex");
+	const std::string DISPLACEMENT_TEX_UNIFORM_NAME("dispTex");
 
 
 	const std::array<std::string, Scene::LightCount> SHADOW_MAP_UNIFORM_NAME_ARRAY = []()
@@ -101,25 +103,35 @@ void Scene::Init(const glm::ivec2& ViewPort)
 		MODEL_MATRIX_UNIFORM_NAME,
 		INVERSE_TRANSPOSED_MODEL_MATRIX_UNIFORM_NAME,
 		CAMERA_POS_UNIFORM_NAME,
-		ROCK_TEXTURE_UNIFORM_NAME,
+		COLOR_TEX_UNIFORM_NAME,
+		NORMAL_TEX_UNIFORM_NAME,
+		DISPLACEMENT_TEX_UNIFORM_NAME,
 		});
 
 	for (int i = 0; i < LightCount; ++i)
 	{
 		m_rockShaderProgram.FindUniform(LIGHT_POS_UNIFORM_NAME_ARRAY[i]);
 	}
-	{
-		Image rockImage;
-		rockImage.LoadImage("../Textures/rock.jpg");
-		assert(rockImage.GetNumberChannels() == 3);
 
-		m_rockTexture.Create();
-		m_rockTexture.Bind();
-		m_rockTexture.TextureImage(0, GL_RGB, rockImage.GetWidth(), rockImage.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, rockImage.GetData());
-		m_rockTexture.SetLinearFiltering();
-		m_rockTexture.SetRepeating();
-		m_rockTexture.Unbind();
-	}
+
+	const auto setupRockTexture = [](Texture& tex, const char* path)
+	{
+		Image image;
+		image.LoadImage(path);
+		assert(image.GetNumberChannels() == 3);
+
+		tex.Create();
+		tex.Bind();
+		tex.TextureImage(0, GL_RGB, image.GetWidth(), image.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, image.GetData());
+		tex.SetLinearFiltering();
+		tex.SetRepeating();
+		tex.Unbind();
+	};
+
+	setupRockTexture(m_rockColor, "../Textures/Stone_02/color.jpg");
+	setupRockTexture(m_rockDisp, "../Textures/Stone_02/disp.jpg");
+	setupRockTexture(m_rockNormal, "../Textures/Stone_02/normal.jpg");
+
 
 
 	if (!m_program.CreateShaders("../Shader/shader.vert", "../Shader/shader.frag"))
@@ -663,8 +675,14 @@ void Scene::RenderScenePass()
 	const glm::mat4 invTranspRockModelMat = glm::transpose(glm::inverse(rockModelMat));
 	m_rockShaderProgram.SetMatrixUniform(invTranspRockModelMat, INVERSE_TRANSPOSED_MODEL_MATRIX_UNIFORM_NAME);
 
-	m_rockShaderProgram.SetSamplerTextureUnit(0, ROCK_TEXTURE_UNIFORM_NAME);
-	m_rockTexture.BindToTextureUnit(0);
+	m_rockShaderProgram.SetSamplerTextureUnit(0, COLOR_TEX_UNIFORM_NAME);
+	m_rockColor.BindToTextureUnit(0);
+
+	m_rockShaderProgram.SetSamplerTextureUnit(1, NORMAL_TEX_UNIFORM_NAME);
+	m_rockNormal.BindToTextureUnit(1);
+
+	m_rockShaderProgram.SetSamplerTextureUnit(2, DISPLACEMENT_TEX_UNIFORM_NAME);
+	m_rockDisp.BindToTextureUnit(2);
 	
 	m_rockShaderProgram.SetMatrixUniform(viewProjection, VIEW_PROJECTION_UNIFORM_NAME);
 	m_rockShaderProgram.SetVec3Uniform(m_camera.m_position, CAMERA_POS_UNIFORM_NAME);

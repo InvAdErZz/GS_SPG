@@ -34,8 +34,8 @@ vec2 Paralax(vec3 viewTS, vec2 uv)
 	float layerStep = 1.f / numLayers;
 	float refinementLayerStep = layerStep / numRefinementLayers;
 
-	float heightScale = 10.1f;
-	heightScale = 0.025f;
+	float heightScale = 0.01f;
+	//heightScale = 0.025f;
 	vec2 maxOffset = (viewTS.xy / viewTS.z) * heightScale;
 	vec2 offsetPerLayer = maxOffset * layerStep;
 	vec2 offsetPerRefinementLayer = maxOffset * refinementLayerStep;
@@ -91,14 +91,16 @@ vec2 Paralax(vec3 viewTS, vec2 uv)
 
 
 void main(void) {
-	float powValue = 5;
+	float powValue = 3;
 	vec3 powVec = vec3(powValue,powValue,powValue);
 	vec3 normalizedWsNormal = normalize(frag_in.wsNormal);
 	vec3 viewDir = normalize(cameraPos - frag_in.wsPosition);
 	
-	vec3 blendfactor = pow(abs(normalizedWsNormal), powVec);
+	vec3 blendfactor = pow(abs(normalizedWsNormal), powVec) - 0.1;
+	blendfactor = max(vec3(0), blendfactor);
+	//vec3 blendfactor = pow(abs(normalizedWsNormal) -, powVec);
 
-	blendfactor /= (blendfactor.x + blendfactor.y + blendfactor.z);
+	blendfactor /= dot(blendfactor, vec3(1));
 
 	vec2 uvX = frag_in.uv.yz;
 	vec2 uvY = frag_in.uv.xz;
@@ -110,16 +112,11 @@ void main(void) {
 	vec3 viewTsY;
 	vec3 viewTsZ;
 	
-	viewTsX = viewDir.yzx;
+	viewTsX = viewDir.zyx;
 	viewTsY = viewDir.xzy;	
 	viewTsZ = viewDir.xyz;
 	
 #if 0
-	vec3 viewTsX.zxy = viewDir.zyx;
-	vec3 viewTsY.xzy = viewDir.xzy;	
-	vec3 viewTsZ.xyz = viewDir.xyz;
-#endif
-#if 1
 	viewTsX.z *= viewAxisSign.x;
 	viewTsY.z *= viewAxisSign.y;
 	viewTsZ.z *= viewAxisSign.z;
@@ -140,9 +137,9 @@ void main(void) {
 	// perform UDN blend. For the most significant direction the only original normals value is used
 	// for the other directions perfom a blend
 	// ws normal is brought into tangent space via swizzles	
-	tsNormX = vec3(tsNormX.xy + normalizedWsNormal.zy, normalizedWsNormal.x);
-	tsNormY = vec3(tsNormX.xy + normalizedWsNormal.xz, normalizedWsNormal.y);
-	tsNormZ = vec3(tsNormX.xy + normalizedWsNormal.xy, normalizedWsNormal.z);
+	tsNormX = vec3(tsNormX.xy + normalizedWsNormal.yz, normalizedWsNormal.x);
+	tsNormY = vec3(tsNormY.xy + normalizedWsNormal.xz, normalizedWsNormal.y);
+	tsNormZ = vec3(tsNormZ.xy + normalizedWsNormal.xy, normalizedWsNormal.z);
 
 	// Convert ts to worldspace via swizzels and perform triplanar blending
 	vec3 finalNormal = normalize(
@@ -167,7 +164,7 @@ void main(void) {
 		texture(colorTex, uvX).xyz * blendfactor.x +
 		texture(colorTex, uvY).xyz * blendfactor.y +
 		texture(colorTex, uvZ).xyz * blendfactor.z 
-		//+ blendfactor
+		//+ blendfactor * 0.3
 		;
 
 

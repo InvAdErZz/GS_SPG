@@ -5,6 +5,7 @@
 #include "FrameBuffer.h"
 #include "LookupBuffer.h"
 #include "Texture3d.h"
+#include "KdTree.h"
 
 struct ProceduralMeshVertex
 {
@@ -24,10 +25,14 @@ public:
 	ProceduralMesh():m_numRockTriangles(0){}
 	void Init();
 	void GenerateMesh(const LookupBuffer& lookupBuffer, float baseDensity);
+	void GeneratedKdTree(const glm::mat4& modelMat);
 	void Render();
+	int CalcNumVertices() const;
 	VertexArray emptyVao;
 
 	AttributeBuffer m_rockVertices;
 	VertexArray m_rockVao;
 	GLuint m_numRockTriangles;
+
+	KdTree m_kdTree;
 };

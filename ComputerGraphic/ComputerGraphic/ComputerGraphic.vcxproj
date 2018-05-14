@@ -158,6 +158,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="AttributeBuffer.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="BufferType.h" />
@@ -167,13 +168,18 @@
     <ClInclude Include="DynamicLight.h" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="KdTree.h" />
+    <ClInclude Include="KdTreeTraverser.h" />
+    <ClInclude Include="LineMesh.h" />
     <ClInclude Include="LookupBuffer.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="ProceduralMesh.h" />
     <ClInclude Include="Query.h" />
+    <ClInclude Include="RayTriangleIntersector.h" />
     <ClInclude Include="RenderBuffer.h" />
     <ClInclude Include="Texture2DMutlisample.h" />
     <ClInclude Include="Texture3d.h" />
+    <ClInclude Include="Triangle.h" />
     <ClInclude Include="TypeToGLEnum.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Key.h" />
@@ -196,6 +202,7 @@
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AABB.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CheckGl.cpp" />
     <ClCompile Include="ComputerGraphic.cpp" />
@@ -203,7 +210,10 @@
     <ClCompile Include="ExternalImplementations.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="KdTree.cpp" />
+    <ClCompile Include="KdTreeTraverser.cpp" />
     <ClCompile Include="Key.cpp" />
+    <ClCompile Include="LineMesh.cpp" />
     <ClCompile Include="LookupBuffer.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshIndexed.cpp" />

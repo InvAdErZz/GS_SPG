@@ -16,6 +16,8 @@ enum class KeyCode
 	KEY_K,
 	KEY_E,
 	KEY_F,
+	KEY_R,
+	KEY_LEFT_SHIFT,
 	KEY_1,
 	KEY_2,
 	KEY_3,

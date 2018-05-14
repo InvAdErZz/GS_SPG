@@ -5,15 +5,11 @@
 #include "gtx/quaternion.hpp"
 #include <string>
 #include "Image.h"
-
+#include "KdTreeTraverser.h"
+#include "LineMesh.h"
 namespace
 {
-	const glm::mat4 biasMatrix(
-		0.5, 0.0, 0.0, 0.0,
-		0.0, 0.5, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.0,
-		0.5, 0.5, 0.5, 1.0
-	);
+	const glm::mat4 rockModelMat = glm::rotate(glm::radians(-90.f), glm::vec3(1.f, 0.f, 0.f)) * glm::scale(glm::vec3(5.f, 5.f, 20.f));
 
 	const glm::ivec2 shadowDimensions(1024, 1024);
 
@@ -89,6 +85,20 @@ namespace
 		"../../NormalMaps/norm2.jpg",
 		"../../NormalMaps/norm3.jpg"
 	};
+
+	glm::vec2 normalizeMousePosition(glm::vec2 mousePos, glm::vec2 viewportSize) {
+		glm::vec2 norm1 = glm::vec2(mousePos.x / viewportSize.x, mousePos.y / viewportSize.y);
+		return (norm1 * 2) - glm::vec2(1, 1);
+	}
+
+
+	glm::vec3 screenToWorld(glm::vec3 screenpos, const Camera& camera)
+	{
+		glm::vec4 cameraSpace = glm::inverse(camera.GetPerspectionMatrix()) * glm::vec4(screenpos, 1.f);
+		cameraSpace /= cameraSpace.w;
+		glm::vec4 worldSpace = glm::inverse(camera.CalcViewMatrix()) * cameraSpace;
+		return glm::vec3(worldSpace);
+	}
 
 }
 
@@ -319,9 +329,23 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_mcLookup.WriteLookupTablesToGpu();
 	m_rock.Init();
 	m_rock.GenerateMesh(m_mcLookup,0.f);
+	m_rock.GeneratedKdTree(rockModelMat);
 
 	m_particleSystem.Init(10'000);
 	m_particleSystem.SetParticelMesh(CubeVertexData.data(), CubeVertexData.size());
+	m_particleSystem.GenerateRandomParticels(glm::vec3(0.f, 0.f, 0.f), 20);
+
+	if (!m_lineShaderProgram.CreateShaders("../Shader/lineshader.vert", "../Shader/lineshader.frag"))
+	{
+		assert(false);
+	}
+
+	m_lineShaderProgram.LinkShaders();
+
+	m_lineShaderProgram.FindUniforms({
+		VIEW_PROJECTION_UNIFORM_NAME,
+		COLOR_UNIFORM_NAME
+		});
 }
 
 void Scene::Update(float deltaTime, const InputManager& inputManager)
@@ -336,12 +360,16 @@ void Scene::Update(float deltaTime, const InputManager& inputManager)
 	{
 		m_rockBaseDensity = std::min(1.0f, m_rockBaseDensity + 0.05f);
 		m_rock.GenerateMesh(m_mcLookup, m_rockBaseDensity);
+		m_rock.GeneratedKdTree(rockModelMat);
+
 		printf("Base Density is now: %f\n", m_rockBaseDensity);
 	}
 	if (inputManager.GetKey(KeyCode::MINUS).GetNumPressed() > 0)
 	{
 		m_rockBaseDensity = std::max(-1.0f, m_rockBaseDensity - 0.05f);
 		m_rock.GenerateMesh(m_mcLookup, m_rockBaseDensity);
+		m_rock.GeneratedKdTree(rockModelMat);
+
 		printf("Base Density is now: %f\n", m_rockBaseDensity);
 	}
 
@@ -397,7 +425,7 @@ void Scene::Update(float deltaTime, const InputManager& inputManager)
 
 void Scene::UpdateFreeMovement(float deltaTime, const InputManager & inputManager)
 {
-	if (inputManager.GetMouseMotion() != glm::vec2{ 0,0 })
+	if (inputManager.GetMouseMotion() != glm::vec2{ 0,0 } && !inputManager.GetKey(KeyCode::KEY_LEFT_SHIFT).IsPressed())
 	{
 		const glm::vec2 mouseMotion = inputManager.GetMouseMotion();
 
@@ -426,6 +454,11 @@ void Scene::UpdateFreeMovement(float deltaTime, const InputManager & inputManage
 		leftInput -= deltaTime * 10.f;
 	}
 	m_camera.UpdateLocation(forwardInput, leftInput);
+
+	if (inputManager.GetKey(KeyCode::KEY_R).GetNumPressed() > 0)
+	{
+		RayTraceAndSpawnParticles(inputManager.GetMousePosition());
+	}
 
 	if (inputManager.GetKey(KeyCode::KEY_1).GetNumPressed() > 0)
 	{
@@ -729,7 +762,7 @@ void Scene::RenderScenePass()
 	m_rockShaderProgram.SetIntUniform(m_dispRefinementLayers, DISPLACEMENT_REFINEMENT_LAYERS_UNIFORM_NAME);
 	m_rockShaderProgram.SetFloatUniform(m_dispScale, DISPLACEMENT_HEIGHT_UNIFORM_NAME);
 
-	const glm::mat4 rockModelMat = glm::rotate(glm::radians(-90.f), glm::vec3(1.f,0.f,0.f)) * glm::scale(glm::vec3(5.f, 5.f, 20.f));
+
 	m_rockShaderProgram.SetMatrixUniform(rockModelMat, MODEL_MATRIX_UNIFORM_NAME);
 
 	const glm::mat4 invTranspRockModelMat = glm::transpose(glm::inverse(rockModelMat));
@@ -757,7 +790,7 @@ void Scene::RenderScenePass()
 	m_rockShaderProgram.UnuseProgram();
 
 	m_particleSystem.Draw(viewProjection);
-
+	DrawLines();
 
 	if (m_allowedSampleSizes[m_sampleIndex] > 1)
 	{
@@ -790,5 +823,41 @@ void Scene::PostProcessPass()
 
 	m_screenTriangleMesh.Render();
 
+}
+
+void Scene::RayTraceAndSpawnParticles(glm::vec2 mousePos)
+{
+	std::printf("mousePos=%s\n", glm::to_string(mousePos).c_str());
+	glm::vec2 nmp = normalizeMousePosition(mousePos, m_viewPort);
+	nmp.y *= -1.f;
+
+	const glm::vec3 direction = glm::normalize(screenToWorld(glm::vec3(nmp, 1.f), m_camera) - screenToWorld(glm::vec3(nmp, 0.f), m_camera));
+
+	float length = 100;
+
+	const auto result = KdTreeTraverser::FindHitTriangle(m_rock.m_kdTree, m_camera.m_position, direction, length);
+	if (result.isValid())
+	{
+		m_particleSystem.GenerateRandomParticels(result.intersectionPoint, 20);
+	}
+
+	m_linesToDrawInWorldSpace.clear();
+	const auto edgeLines = m_rock.m_kdTree.rootNode()->boundingBox.getEdgeLines();
+	m_linesToDrawInWorldSpace.insert(m_linesToDrawInWorldSpace.begin(), edgeLines.begin(), edgeLines.end());
+	m_linesToDrawInWorldSpace.push_back(m_camera.m_position);
+	m_linesToDrawInWorldSpace.push_back(m_camera.m_position + length * direction);
+}
+
+void Scene::DrawLines()
+{
+	glLineWidth(2.f);
+	LineMesh lines;
+	lines.CreateInstanceOnGPU(m_linesToDrawInWorldSpace);
+	//lines.CreateInstanceOnGPU({ LineData{glm::vec3(0.f,0.f,0.f), glm::vec3(0.f,1.f,0.f)} });
+	m_lineShaderProgram.UseProgram();
+	m_lineShaderProgram.SetVec4Uniform(glm::vec4(1, 0, 0, 1), COLOR_UNIFORM_NAME);
+	glm::mat4 viewProjection = m_camera.GetPerspectionMatrix() * m_camera.CalcViewMatrix();
+	m_lineShaderProgram.SetMatrixUniform(viewProjection, VIEW_PROJECTION_UNIFORM_NAME);
+	lines.Render();
 }
 

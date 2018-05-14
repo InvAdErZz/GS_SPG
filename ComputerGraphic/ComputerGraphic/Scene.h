@@ -45,6 +45,8 @@ private:
 	void ShadowMapPass(int LightIndex);
 	void RenderScenePass();
 	void PostProcessPass();
+	void RayTraceAndSpawnParticles(glm::vec2 mousePos);
+	void DrawLines();
 
 	Mesh m_cubeMesh;
 	MeshIndexed m_screenTriangleMesh;
@@ -57,6 +59,9 @@ private:
 	ShaderProgram m_shadowMapProgram;
 	ShaderProgram m_postProcessProgram;
 	ShaderProgram m_rockShaderProgram;
+
+	ShaderProgram m_lineShaderProgram;
+
 
 	FrameBuffer m_framebuffer;
 	FrameBuffer m_msaaFrameBuffer;
@@ -94,4 +99,6 @@ private:
 	float m_dispScale = 0.0625;
 
 	std::vector<GLsizei> m_allowedSampleSizes;
+
+	std::vector<glm::vec3> m_linesToDrawInWorldSpace;
 };

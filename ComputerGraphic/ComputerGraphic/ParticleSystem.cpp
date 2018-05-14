@@ -65,7 +65,7 @@ void ParticleSystem::Init(int maxParticles)
 		AttributeBuffer newBuffer;
 		newBuffer.Create();
 		newBuffer.Bind();
-		newBuffer.AllocateBufferData(bufferSize, GL_DYNAMIC_COPY);
+		newBuffer.AllocateBufferData(bufferSize, GL_DYNAMIC_READ);
 
 		newBuffer.Unbind();
 
@@ -151,13 +151,9 @@ void ParticleSystem::GenerateRandomParticels(glm::vec3 location, int num)
 	data.resize(num);
 	for (int i = 0; i < num; ++i)
 	{
-		/*data[i].position = location + glm::vec3{ positionDist(rand), positionDist(rand), positionDist(rand) };
+		data[i].position = location + glm::vec3{ positionDist(rand), positionDist(rand), positionDist(rand) };
 		data[i].velocity = glm::vec3{ positionDist(rand), positionDist(rand), 1.f };
-		data[i].secondsToLive = secondsToLiveDist(rand);*/
-
-		data[i].position = location + glm::vec3{ i,i,i };
-		data[i].velocity = glm::vec3{ i,i,i };
-		data[i].secondsToLive = i;
+		data[i].secondsToLive = secondsToLiveDist(rand);
 	}
 
 	AddParticles(data.data(), data.size());
@@ -194,6 +190,7 @@ void ParticleSystem::AddParticles(const ParticleData* particles, int numberOfPar
 
 void ParticleSystem::Update(float DeltaSeconds)
 {
+#if 1
 	m_vao.Bind();
 	GetReadBuffer().Bind();
 	BindReadBufferAttribsToVao();
@@ -230,7 +227,7 @@ void ParticleSystem::Update(float DeltaSeconds)
 	GetReadBuffer().Unbind();
 	m_vao.Unbind();
 	SwitchParticleBuffers();
-
+#endif
 #if 0
 	std::puts("Update:");
 	GetReadBuffer().Bind();

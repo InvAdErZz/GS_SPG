@@ -25,6 +25,8 @@ namespace
 			return KeyCode::KEY_L;
 		case SDLK_k:
 			return KeyCode::KEY_K;
+		case SDLK_r:
+			return KeyCode::KEY_R;
 		case SDLK_1:
 			return KeyCode::KEY_1;
 		case SDLK_2:
@@ -47,6 +49,8 @@ namespace
 			return KeyCode::KEY_0;
 		case SDLK_SPACE:
 			return KeyCode::KEY_SPACE;
+		case SDLK_LSHIFT:
+			return KeyCode::KEY_LEFT_SHIFT;
 		
 		case SDLK_PLUS:
 			return KeyCode::PLUS;

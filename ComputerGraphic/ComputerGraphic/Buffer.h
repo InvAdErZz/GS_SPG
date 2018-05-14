@@ -48,6 +48,7 @@ template<class DataType>
 void Buffer<TYPE>::GetBufferData(DataType* outData, int numElementsToCopy, size_t readOffset)
 {
 	glGetBufferSubData(BUFFER_TARGET, readOffset * sizeof(DataType), numElementsToCopy * sizeof(DataType), static_cast<GLvoid*>(outData));
+	ASSERT_GL_ERROR_MACRO();
 }
 
 template<BufferType TYPE>
@@ -56,6 +57,7 @@ void Buffer<TYPE>::SetBufferData(const DataType* data, size_t numElementsToCopy,
 {
 	assert(IsBound());
 	glBufferSubData(BUFFER_TARGET, writeOffsetInBuffer * sizeof(DataType), numElementsToCopy * sizeof(DataType), static_cast<const GLvoid*>(data));
+	ASSERT_GL_ERROR_MACRO();
 }
 
 using IndexBuffer = Buffer<BufferType::Index>;

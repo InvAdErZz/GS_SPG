@@ -254,6 +254,47 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer, float baseDe
 	m_numRockTriangles = numRockPrimitives;
 }
 
+void ProceduralMesh::GeneratedKdTree(const glm::mat4& modelMat)
+{
+	std::vector<ProceduralMeshVertex> outMeshData;
+	const int rockTriangles = m_numRockTriangles;
+	const int rockVertices = rockTriangles * 3;
+	outMeshData.resize(CalcNumVertices());
+
+	m_rockVertices.Bind();
+	m_rockVertices.GetBufferData(outMeshData.data(), rockVertices, 0);
+	m_rockVertices.Unbind();
+
+	std::vector<Triangle> m_triangles;
+	m_triangles.reserve(rockTriangles);
+
+	for (int i = 0; i < rockVertices; i += 3)
+	{
+#if 1
+		glm::vec4 pos1 = modelMat * glm::vec4(outMeshData[i + 0].position, 1.f);
+		glm::vec4 pos2 = modelMat * glm::vec4(outMeshData[i + 1].position, 1.f);
+		glm::vec4 pos3 = modelMat * glm::vec4(outMeshData[i + 2].position, 1.f);
+
+		m_triangles.emplace_back(
+			glm::vec3(pos1),
+			glm::vec3(pos2),
+			glm::vec3(pos3)
+		);
+#else
+		m_triangles.emplace_back(
+			outMeshData[i + 0].position,
+			outMeshData[i + 1].position,
+			outMeshData[i + 2].position
+		);
+#endif
+	}	
+	assert(m_triangles.size() == rockTriangles);
+
+	m_kdTree.resetTree();
+	m_kdTree.addCollisionMesh(m_triangles, "The Rock");
+	m_kdTree.generateTree();
+}
+
 void ProceduralMesh::Render()
 {
 	VertexArray renderVao;
@@ -273,6 +314,11 @@ void ProceduralMesh::Render()
 
 	glFlush();
 
-	glDrawArrays(GL_TRIANGLES, 0, m_numRockTriangles * 3);
+	glDrawArrays(GL_TRIANGLES, 0, CalcNumVertices());
 	renderVao.Unbind();
+}
+
+int ProceduralMesh::CalcNumVertices() const
+{
+	return m_numRockTriangles * 3;
 }

@@ -37,7 +37,7 @@ inline void Mesh::CreateInstanceOnGPU(const std::vector<VertextAttribute>& data)
 
 	m_attribBuffer.Create();
 	m_attribBuffer.Bind();
-	m_attribBuffer.UploadBufferData(data);
+	m_attribBuffer.AllocateAndSetBufferData(data);
 
 	m_attribBuffer.SetVertexAttributePtr(
 		VertextAttribute::POSITION_ATTRIBUTE_LOCATION,

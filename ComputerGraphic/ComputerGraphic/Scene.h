@@ -17,6 +17,7 @@
 #include "Texture3d.h"
 #include "LookupBuffer.h"
 #include "ProceduralMesh.h"
+#include "ParticleSystem.h"
 
 enum class PathFollower
 {
@@ -79,6 +80,8 @@ private:
 
 	Path m_path;
 	PathFollower m_pathFollower = PathFollower::none;
+
+	ParticleSystem m_particleSystem;
 	
 	glm::ivec2 m_viewPort;
 	float m_currentRoughness = 0.5f;

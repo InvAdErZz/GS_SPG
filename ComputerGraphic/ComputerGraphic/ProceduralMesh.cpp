@@ -208,7 +208,7 @@ void ProceduralMesh::GenerateMesh(const LookupBuffer& lookupBuffer, float baseDe
 		AttributeBuffer pointCloudBuffer;
 		pointCloudBuffer.Create();
 		pointCloudBuffer.Bind();
-		pointCloudBuffer.UploadBufferData(dummyPoints);
+		pointCloudBuffer.AllocateAndSetBufferData(dummyPoints);
 
 		pointCloudBuffer.SetVertexAttributePtr(0, glm::vec2::length(), GL_FLOAT, sizeof(glm::vec2), 0);
 

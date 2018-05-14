@@ -21,17 +21,33 @@ public:
 	void Bind();
 	static void Unbind();
 
+
+
 	template<class ContainerType>
-	void UploadBufferData(const ContainerType& data);
+	void AllocateAndSetBufferData(const ContainerType& data);
 
 	template<class DataType, int arraySize>
-	void UploadBufferData(DataType(&data)[arraySize]);
+	void AllocateAndSetBufferData(DataType(&data)[arraySize]);
+
+	template<class DataType> 
+	void AllocateAndSetBufferData(const DataType* data, int dataSize);
+
+	template<class DataType>
+	void SetBufferData(const DataType* data, size_t numElementsToCopy, size_t writeOffsetInBuffer);
 
 	void AllocateBufferData(GLsizeiptr size, GLenum usage);
 
 
 	void FreeResource();
 };
+
+template<BufferType TYPE>
+template<class DataType>
+void Buffer<TYPE>::SetBufferData(const DataType* data, size_t numElementsToCopy, size_t writeOffsetInBuffer)
+{
+	assert(IsBound());
+	glBufferSubData(BUFFER_TARGET, writeOffsetInBuffer * sizeof(DataType), numElementsToCopy * sizeof(DataType), static_cast<const GLvoid*>(data));
+}
 
 using IndexBuffer = Buffer<BufferType::Index>;
 
@@ -81,8 +97,17 @@ inline bool Buffer<TYPE>::IsBound() const
 }
 
 template<BufferType TYPE>
+template<class DataType>
+void Buffer<TYPE>::AllocateAndSetBufferData(const DataType* data, int dataSize)
+{
+	assert(IsBound());
+	glBufferData(BUFFER_TARGET, sizeof(DataType) * dataSize, data, GL_STATIC_DRAW);
+	ASSERT_GL_ERROR_MACRO();
+}
+
+template<BufferType TYPE>
 template<class ContainerType>
-void Buffer<TYPE>::UploadBufferData(const ContainerType& data)
+void Buffer<TYPE>::AllocateAndSetBufferData(const ContainerType& data)
 {
 	assert(IsBound());
 	glBufferData(BUFFER_TARGET, sizeof(ContainerType::value_type) * data.size(), data.data(), GL_STATIC_DRAW);
@@ -91,7 +116,7 @@ void Buffer<TYPE>::UploadBufferData(const ContainerType& data)
 
 template<BufferType TYPE>
 template<class DataType, int arraySize>
-void Buffer<TYPE>::UploadBufferData(DataType(&data)[arraySize])
+void Buffer<TYPE>::AllocateAndSetBufferData(DataType(&data)[arraySize])
 {
 	assert(IsBound());
 	glBufferData(BUFFER_TARGET, sizeof(DataType) * arraySize, data, GL_STATIC_DRAW);

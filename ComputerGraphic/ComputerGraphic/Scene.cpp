@@ -235,7 +235,8 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_cubeShaderDatas.emplace_back(glm::vec3(30.f, 0.f, -10.f), glm::vec4(0.0f, 0.f, 0.f, 1.f), 2);
 
 	glm::vec3 size(1.f, 1.f, 1.f);
-	m_cubeMesh.CreateInstanceOnGPU(MeshCreation::LoadFromFile(CUBE_MESH_PATH)[0]);
+	const auto CubeVertexData = MeshCreation::LoadFromFile(CUBE_MESH_PATH)[0];
+	m_cubeMesh.CreateInstanceOnGPU(CubeVertexData);
 
 	m_screenTriangleMesh.CreateInstanceOnGPU(MeshCreation::CreateScreenTriangle_indexed());
 
@@ -318,11 +319,19 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_mcLookup.WriteLookupTablesToGpu();
 	m_rock.Init();
 	m_rock.GenerateMesh(m_mcLookup,0.f);
+
+	m_particleSystem.Init(10'000);
+	m_particleSystem.SetParticelMesh(CubeVertexData.data(), CubeVertexData.size());
 }
 
 void Scene::Update(float deltaTime, const InputManager& inputManager)
 {
-	
+	m_particleSystem.Update(deltaTime);
+	if (inputManager.GetKey(KeyCode::KEY_4).GetNumPressed() > 0)
+	{
+		m_particleSystem.GenerateRandomParticels(glm::vec3(0.f, 0.f, 0.f), 20);
+	}
+
 	if (inputManager.GetKey(KeyCode::PLUS).GetNumPressed() > 0)
 	{
 		m_rockBaseDensity = std::min(1.0f, m_rockBaseDensity + 0.05f);
@@ -742,6 +751,8 @@ void Scene::RenderScenePass()
 	m_rock.Render();
 
 	m_rockShaderProgram.UnuseProgram();
+
+	m_particleSystem.Draw(viewProjection);
 
 
 	if (m_allowedSampleSizes[m_sampleIndex] > 1)

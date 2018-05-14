@@ -30,7 +30,7 @@ inline Query::Query()
 	:m_queryType(InvalidQuery)
 {}
 
-Query::~Query()
+inline Query::~Query()
 {
 	assert(InvalidQuery == m_queryType);
 }
@@ -43,7 +43,7 @@ inline void Query::Begin(GLenum queryType)
 	ASSERT_GL_ERROR_MACRO();
 }
 
-void Query::End()
+inline void Query::End()
 {
 	assert(InvalidQuery != m_queryType);
 	glEndQuery(m_queryType);

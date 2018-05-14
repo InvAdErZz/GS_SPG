@@ -308,11 +308,11 @@ void LookupBuffer::WriteLookupTablesToGpu()
 {
 	m_edgeBuffer.Create();
 	m_edgeBuffer.Bind();
-	m_edgeBuffer.UploadBufferData(edgeTable);
+	m_edgeBuffer.AllocateAndSetBufferData(edgeTable);
 
 	m_triBuffer.Create();
 	m_triBuffer.Bind();
-	m_triBuffer.UploadBufferData(trisTable);
+	m_triBuffer.AllocateAndSetBufferData(trisTable);
 	m_triBuffer.Unbind();
 
 }

@@ -107,7 +107,7 @@ bool ShaderProgram::CreateAndAttachShader(const char* shaderFileName, ShaderType
 	Shader& currentShader = m_shaders.back();
 	if (!currentShader.Create(shaderFileName))
 	{
-		printf("Shader Creation Failed!");
+		printf("Shader Creation of shader \"%s\" Failed!", shaderFileName);
 		m_shaders.pop_back();
 		return false;
 	}

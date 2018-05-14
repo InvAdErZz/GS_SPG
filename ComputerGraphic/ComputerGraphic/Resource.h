@@ -13,6 +13,8 @@ public:
 	Resource(Resource&& other) noexcept;
 	Resource& operator=(Resource&& other) noexcept;
 
+	void swap(Resource& other);
+
 	bool IsValid() const;
 	const GLuint GetHandle() const { return m_handle; }
 
@@ -36,6 +38,14 @@ Resource<DerivedClass>::~Resource()
 		ASSERT_GL_ERROR_MACRO();
 	}
 }
+
+
+template<class DerivedClass>
+void Resource<DerivedClass>::swap(Resource& other)
+{
+	std::swap(m_handle, other.m_handle);
+}
+
 
 template<class DerivedClass>
 inline Resource<DerivedClass>::Resource(Resource<DerivedClass>&& other) noexcept

@@ -11,12 +11,12 @@ void MeshIndexed::CreateInstanceOnGPU(const MeshData & data)
 
 	m_indexBuffer.Create();
 	m_indexBuffer.Bind();
-	m_indexBuffer.UploadBufferData(data.indexData);
+	m_indexBuffer.AllocateAndSetBufferData(data.indexData);
 	m_indexBuffer.Unbind();
 
 	m_attribBuffer.Create();
 	m_attribBuffer.Bind();
-	m_attribBuffer.UploadBufferData(data.vertexData);
+	m_attribBuffer.AllocateAndSetBufferData(data.vertexData);
 	m_attribBuffer.SetVertexAttributePtr(VertextAttribute::POSITION_ATTRIBUTE_LOCATION, 3, GL_FLOAT, sizeof(VertextAttribute), offsetof(VertextAttribute, position));
 	m_attribBuffer.Unbind();
 }

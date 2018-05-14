@@ -10,12 +10,15 @@ struct VertextAttribute
 	glm::vec3 bitangent;
 	glm::vec2 texcoord;
 
-	static constexpr GLuint POSITION_ATTRIBUTE_LOCATION = 0;
-	static constexpr GLuint NORMAL_ATTRIBUTE_LOCATION = 1;
-	static constexpr GLuint TANGENT_ATTRIBUTE_LOCATION = 2;
-	static constexpr GLuint BITANGENT_ATTRIBUTE_LOCATION = 3;
-	static constexpr GLuint TEXTCOORD_ATTRIBUTE_LOCATION = 4;
-	
+	enum Location
+	{
+		POSITION_ATTRIBUTE_LOCATION = 0,
+		NORMAL_ATTRIBUTE_LOCATION,
+		TANGENT_ATTRIBUTE_LOCATION,
+		BITANGENT_ATTRIBUTE_LOCATION,
+		TEXTCOORD_ATTRIBUTE_LOCATION,
+		enum_size
+	};
 
 
 	static constexpr const char* POSITION_ATTRIBUTE_NAME = "in_Position";

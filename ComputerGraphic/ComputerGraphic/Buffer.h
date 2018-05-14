@@ -37,9 +37,18 @@ public:
 
 	void AllocateBufferData(GLsizeiptr size, GLenum usage);
 
+	template<class DataType>
+	void GetBufferData(DataType* outData, int numElementsToCopy, size_t readOffset);
 
 	void FreeResource();
 };
+
+template<BufferType TYPE>
+template<class DataType>
+void Buffer<TYPE>::GetBufferData(DataType* outData, int numElementsToCopy, size_t readOffset)
+{
+	glGetBufferSubData(BUFFER_TARGET, readOffset * sizeof(DataType), numElementsToCopy * sizeof(DataType), static_cast<GLvoid*>(outData));
+}
 
 template<BufferType TYPE>
 template<class DataType>

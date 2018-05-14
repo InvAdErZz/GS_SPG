@@ -65,7 +65,7 @@ void ParticleSystem::Init(int maxParticles)
 		AttributeBuffer newBuffer;
 		newBuffer.Create();
 		newBuffer.Bind();
-		newBuffer.AllocateBufferData(bufferSize, GL_STATIC_COPY);
+		newBuffer.AllocateBufferData(bufferSize, GL_DYNAMIC_COPY);
 
 		newBuffer.Unbind();
 
@@ -143,7 +143,7 @@ void ParticleSystem::SetParticelMesh(const VertextAttribute* data, int numVertic
 void ParticleSystem::GenerateRandomParticels(glm::vec3 location, int num)
 {
 	std::minstd_rand rand;
-	std::uniform_real_distribution<float> positionDist(-1.f, 1.f);
+	std::uniform_real_distribution<float> positionDist(-5.f, 5.f);
 	std::uniform_real_distribution<float> velocityDist(-1.f, 1.f);
 	std::uniform_real_distribution<float> secondsToLiveDist(1.f, 10.f);
 
@@ -151,9 +151,13 @@ void ParticleSystem::GenerateRandomParticels(glm::vec3 location, int num)
 	data.resize(num);
 	for (int i = 0; i < num; ++i)
 	{
-		data[i].position = location + glm::vec3{ positionDist(rand), positionDist(rand), positionDist(rand) };
+		/*data[i].position = location + glm::vec3{ positionDist(rand), positionDist(rand), positionDist(rand) };
 		data[i].velocity = glm::vec3{ positionDist(rand), positionDist(rand), 1.f };
-		data[i].secondsToLive = secondsToLiveDist(rand);
+		data[i].secondsToLive = secondsToLiveDist(rand);*/
+
+		data[i].position = location + glm::vec3{ i,i,i };
+		data[i].velocity = glm::vec3{ i,i,i };
+		data[i].secondsToLive = i;
 	}
 
 	AddParticles(data.data(), data.size());
@@ -170,10 +174,22 @@ void ParticleSystem::AddParticles(const ParticleData* particles, int numberOfPar
 	assert(realParticlesToWrite <= numberOfParticles);
 
 	GetReadBuffer().Bind();
-	GetReadBuffer().SetBufferData(particles, numberOfParticles, realParticlesToWrite);
+	GetReadBuffer().SetBufferData(particles, realParticlesToWrite, m_numCurrentParticles);
+	m_numCurrentParticles += realParticlesToWrite;
+	glFlush();
+
+
+	std::array<ParticleData, 200> outData;
+	int dataToRead = std::min<int>(outData.size(), m_numCurrentParticles);
+	GetReadBuffer().GetBufferData(outData.data(), dataToRead, 0);
+	for (int i = 0; i < dataToRead; ++i)
+	{
+		std::printf("%d: time to live = %f \n", i, outData[i].secondsToLive);
+	}
+
+
 	GetReadBuffer().Unbind();
 
-	m_numCurrentParticles += realParticlesToWrite;
 }
 
 void ParticleSystem::Update(float DeltaSeconds)
@@ -214,6 +230,22 @@ void ParticleSystem::Update(float DeltaSeconds)
 	GetReadBuffer().Unbind();
 	m_vao.Unbind();
 	SwitchParticleBuffers();
+
+#if 0
+	std::puts("Update:");
+	GetReadBuffer().Bind();
+	std::array<ParticleData, 200> outData;
+	int dataToRead = std::min<int>(outData.size(), m_numCurrentParticles);
+	GetReadBuffer().GetBufferData(outData.data(), dataToRead, 0);
+	for (int i = 0; i < dataToRead; ++i)
+	{
+		std::printf("%d: pos(%f,%f,%f), vel(%f,%f,%f), secondsToLive(%f) \n", i,
+			outData[i].position.x, outData[i].position.x, outData[i].position.z,
+			outData[i].velocity.x, outData[i].velocity.x, outData[i].velocity.z,
+			outData[i].secondsToLive);
+	}
+	GetReadBuffer().Unbind();
+#endif
 }
 
 void ParticleSystem::Draw(const glm::mat4& ViewProjectionMatrix)

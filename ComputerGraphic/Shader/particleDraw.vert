@@ -27,8 +27,8 @@ void main(void)
 {
 	vec3 positionInParticleSystem = in_Position + in_ParticlePosition;
 	
-	vs_out.Position = (vec4(positionInParticleSystem,1) * model).xyz;
-	vs_out.Normal = (vec4(positionInParticleSystem,0) * inverseTransposedModelMat).xyz;
+	vs_out.Position = positionInParticleSystem; //(vec4(positionInParticleSystem,1) * model).xyz;
+	vs_out.Normal = in_Normal;//(vec4(positionInParticleSystem,0) * inverseTransposedModelMat).xyz;
 	vs_out.Color = mix(vec3(1,0,0), vec3(0,1,0), in_ParticleSecondsToLive / 3.f);
 	
 	gl_Position = viewProjection *  vec4(vs_out.Position, 1.0);	

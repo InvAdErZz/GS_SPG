@@ -86,14 +86,17 @@ private:
 	Path m_path;
 	PathFollower m_pathFollower = PathFollower::none;
 
-	ParticleSystem m_particleSystem;
+	std::array<ParticleSystem,3> m_particleSystem;
+	int m_currentParticleSystem = 0;
 	
 	glm::ivec2 m_viewPort;
 	float m_currentRoughness = 0.5f;
 	bool m_msaaFixedSamples = false;
 	int m_sampleIndex = 0;
 	float m_rockBaseDensity = 0.f;
+	float m_particleUpdateRateModifier = 1.f;
 
+	int m_numParticlesToSpawn = 20;
 	int m_dispLayers = 2;
 	int m_dispRefinementLayers = 2;
 	float m_dispScale = 0.0625;

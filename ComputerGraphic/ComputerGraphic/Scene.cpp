@@ -78,6 +78,9 @@ namespace
 	}();
 
 	const char* CUBE_MESH_PATH = "../../Models/cube.obj";
+	const char* TORUS_MESH_PATH = "../../Models/torus.obj";
+	const char* CONE_MESH_PATH = "../../Models/cone.obj";
+
 
 	const std::array<const char*, 3> NormalMapPath =
 	{
@@ -247,6 +250,9 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	glm::vec3 size(1.f, 1.f, 1.f);
 	const auto CubeVertexData = MeshCreation::LoadFromFile(CUBE_MESH_PATH)[0];
 	m_cubeMesh.CreateInstanceOnGPU(CubeVertexData);
+	const auto TorusVertexData = MeshCreation::LoadFromFile(TORUS_MESH_PATH)[0];
+	const auto ConeVertexData = MeshCreation::LoadFromFile(CONE_MESH_PATH)[0];
+
 
 	m_screenTriangleMesh.CreateInstanceOnGPU(MeshCreation::CreateScreenTriangle_indexed());
 
@@ -331,9 +337,30 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_rock.GenerateMesh(m_mcLookup,0.f);
 	m_rock.GeneratedKdTree(rockModelMat);
 
-	m_particleSystem.Init(10'000);
-	m_particleSystem.SetParticelMesh(CubeVertexData.data(), CubeVertexData.size());
-	m_particleSystem.GenerateRandomParticels(glm::vec3(0.f, 0.f, 0.f), 20);
+	{
+		m_particleSystem[0].Init(
+			10'000,
+			"../Shader/particleUpdate.vert", "../Shader/particleUpdate.geo",
+			"../Shader/particleDraw.vert", "../Shader/particleDraw.frag"
+		);
+		m_particleSystem[0].SetParticelMesh(CubeVertexData.data(), CubeVertexData.size());
+	}
+	{
+		m_particleSystem[1].Init(
+			10'000,
+			"../Shader/particleUpdate1.vert", "../Shader/particleUpdate1.geo",
+			"../Shader/particleDraw1.vert", "../Shader/particleDraw1.frag"
+		);
+		m_particleSystem[1].SetParticelMesh(TorusVertexData.data(), TorusVertexData.size());
+	}
+	{
+		m_particleSystem[2].Init(
+			10'000,
+			"../Shader/particleUpdate2.vert", "../Shader/particleUpdate2.geo",
+			"../Shader/particleDraw2.vert", "../Shader/particleDraw2.frag"
+		);
+		m_particleSystem[2].SetParticelMesh(ConeVertexData.data(), ConeVertexData.size());
+	}
 
 	if (!m_lineShaderProgram.CreateShaders("../Shader/lineshader.vert", "../Shader/lineshader.frag"))
 	{
@@ -350,10 +377,9 @@ void Scene::Init(const glm::ivec2& ViewPort)
 
 void Scene::Update(float deltaTime, const InputManager& inputManager)
 {
-	m_particleSystem.Update(deltaTime);
-	if (inputManager.GetKey(KeyCode::KEY_4).GetNumPressed() > 0)
+	for (auto& ps : m_particleSystem)
 	{
-		m_particleSystem.GenerateRandomParticels(glm::vec3(0.f, 0.f, 0.f), 20);
+		ps.Update(deltaTime * m_particleUpdateRateModifier);
 	}
 
 	if (inputManager.GetKey(KeyCode::PLUS).GetNumPressed() > 0)
@@ -405,6 +431,32 @@ void Scene::Update(float deltaTime, const InputManager& inputManager)
 	{
 		m_dispLayers = std::max(1, m_dispLayers - 1);
 		printf("Parallax main steps: %d\n", m_dispLayers);
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_O).GetNumPressed() > 0)
+	{
+		m_numParticlesToSpawn = std::min(1, m_numParticlesToSpawn / 2);
+		printf("Number Particles to Spawn %d\n", m_numParticlesToSpawn);
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_P).GetNumPressed() > 0)
+	{
+		m_numParticlesToSpawn*=2;
+		printf("Number Particles to Spawn %d\n", m_numParticlesToSpawn);
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_U).GetNumPressed() > 0)
+	{
+		m_particleUpdateRateModifier *= 2.f;
+		printf("Particle Update Rate modifier: %f\n", m_particleUpdateRateModifier);
+
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_I).GetNumPressed() > 0)
+	{
+		m_particleUpdateRateModifier *= 0.5f;
+		printf("Particle Update Rate modifier: %f\n", m_particleUpdateRateModifier);
+
 	}
 
 	if (m_path.IsFollowingPath())
@@ -789,7 +841,11 @@ void Scene::RenderScenePass()
 
 	m_rockShaderProgram.UnuseProgram();
 
-	m_particleSystem.Draw(viewProjection);
+	for (auto& ps : m_particleSystem)
+	{
+		ps.Draw(viewProjection);
+	}
+
 	DrawLines();
 
 	if (m_allowedSampleSizes[m_sampleIndex] > 1)
@@ -838,7 +894,8 @@ void Scene::RayTraceAndSpawnParticles(glm::vec2 mousePos)
 	const auto result = KdTreeTraverser::FindHitTriangle(m_rock.m_kdTree, m_camera.m_position, direction, length);
 	if (result.isValid())
 	{
-		m_particleSystem.GenerateRandomParticels(result.intersectionPoint, 20);
+		m_particleSystem[m_currentParticleSystem].GenerateRandomParticels(result.intersectionPoint, m_numParticlesToSpawn);
+		m_currentParticleSystem = (m_currentParticleSystem + 1) % m_particleSystem.size();
 	}
 
 	m_linesToDrawInWorldSpace.clear();

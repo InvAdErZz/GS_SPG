@@ -41,10 +41,11 @@ namespace
 				{
 					tangent *= -1.f;
 				}
-				
-				assert(std::abs(glm::dot(tangent, bitangent)) < 0.00001f);
-				assert(std::abs(glm::dot(attributs[i].normal, tangent)) < 0.00001f);
-
+			
+#if 0
+				assert(std::abs(glm::dot(tangent, bitangent)) < 0.001f);
+				assert(std::abs(glm::dot(attributs[i].normal, tangent)) < 0.001f);
+#endif
 				attributs[i + 0].tangent = tangent;
 				attributs[i + 1].tangent = tangent;
 				attributs[i + 2].tangent = tangent;

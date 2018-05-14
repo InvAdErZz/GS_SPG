@@ -57,7 +57,10 @@ void Init()
 
 	glEnable(GL_DEBUG_OUTPUT);
 
+#if NDEBUG
+#else
 	glDebugMessageCallback(errorCallback, nullptr);
+#endif
 
 	// SUPER VERBOSE DEBUGGING!
 	/*if (glDebugMessageControlARB != NULL) {

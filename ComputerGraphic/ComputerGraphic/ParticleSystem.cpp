@@ -16,36 +16,6 @@ namespace
 
 	const int defaultDevisor = 0;
 	const int advanceOncePerInstance = 1;
-
-	/*void SetVertexAttribDevisors()
-	{
-		glVertexAttribDivisor(ParticleData::PositionLocation, advanceOncePerInstance);
-		glVertexAttribDivisor(ParticleData::VelocityLocation, advanceOncePerInstance);
-		glVertexAttribDivisor(ParticleData::SecondsToLiveLocation, advanceOncePerInstance);
-
-		int particleLocations = ParticleData::Location::enum_Size;
-
-		glVertexAttribDivisor(VertextAttribute::POSITION_ATTRIBUTE_LOCATION + particleLocations, defaultDevisor);
-		glVertexAttribDivisor(VertextAttribute::NORMAL_ATTRIBUTE_LOCATION + particleLocations, defaultDevisor);
-		glVertexAttribDivisor(VertextAttribute::TANGENT_ATTRIBUTE_LOCATION + particleLocations, defaultDevisor);
-		glVertexAttribDivisor(VertextAttribute::BITANGENT_ATTRIBUTE_LOCATION + particleLocations, defaultDevisor);
-		glVertexAttribDivisor(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION + particleLocations, defaultDevisor);
-	}
-	void RestoreVertexAttribDevisors()
-	{
-		glVertexAttribDivisor(ParticleData::PositionLocation, defaultDevisor);
-		glVertexAttribDivisor(ParticleData::VelocityLocation, defaultDevisor);
-		glVertexAttribDivisor(ParticleData::SecondsToLiveLocation, defaultDevisor);
-
-		int particleLocations = ParticleData::Location::enum_Size;
-
-		glVertexAttribDivisor(VertextAttribute::POSITION_ATTRIBUTE_LOCATION + particleLocations, defaultDevisor);
-		glVertexAttribDivisor(VertextAttribute::NORMAL_ATTRIBUTE_LOCATION + particleLocations, defaultDevisor);
-		glVertexAttribDivisor(VertextAttribute::TANGENT_ATTRIBUTE_LOCATION + particleLocations, defaultDevisor);
-		glVertexAttribDivisor(VertextAttribute::BITANGENT_ATTRIBUTE_LOCATION + particleLocations, defaultDevisor);
-		glVertexAttribDivisor(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION + particleLocations, defaultDevisor);
-	}*/
-
 }
 
 
@@ -56,7 +26,7 @@ ParticleSystem::ParticleSystem()
 
 }
 
-void ParticleSystem::Init(int maxParticles)
+void ParticleSystem::Init(int maxParticles,const char* updateVert, const char* updateGeo, const char* drawVert, const char* drawFrag)
 {
 	m_maxParticles = maxParticles;
 	const GLsizeiptr bufferSize = maxParticles * sizeof(ParticleData);
@@ -82,8 +52,9 @@ void ParticleSystem::Init(int maxParticles)
 	// setup update shader
 	{
 		m_updateShader.CreateProgram();
-		m_updateShader.CreateAndAttachShader("../Shader/particleUpdate.vert", ShaderType::Vertex);
-		m_updateShader.CreateAndAttachShader("../Shader/particleUpdate.geo", ShaderType::Geometry);
+		
+		m_updateShader.CreateAndAttachShader(updateVert, ShaderType::Vertex);
+		m_updateShader.CreateAndAttachShader(updateGeo, ShaderType::Geometry);
 
 		m_updateShader.BindAttributeLocation(ParticleData::PositionLocation, ParticleData::POSITION_ATTRIBUTE_NAME);
 		m_updateShader.BindAttributeLocation(ParticleData::VelocityLocation, ParticleData::VELOCITY_ATTRIBUTE_NAME);
@@ -104,8 +75,8 @@ void ParticleSystem::Init(int maxParticles)
 	// setup draw shader
 	{
 		m_drawShader.CreateProgram();
-		m_drawShader.CreateAndAttachShader("../Shader/particleDraw.vert", ShaderType::Vertex);
-		m_drawShader.CreateAndAttachShader("../Shader/particleDraw.frag", ShaderType::Fragment);
+		m_drawShader.CreateAndAttachShader(drawVert, ShaderType::Vertex);
+		m_drawShader.CreateAndAttachShader(drawFrag, ShaderType::Fragment);
 
 		// particle data
 		m_drawShader.BindAttributeLocation(ParticleData::PositionLocation, ParticleData::POSITION_ATTRIBUTE_NAME);
@@ -143,8 +114,8 @@ void ParticleSystem::SetParticelMesh(const VertextAttribute* data, int numVertic
 void ParticleSystem::GenerateRandomParticels(glm::vec3 location, int num)
 {
 	std::minstd_rand rand;
-	std::uniform_real_distribution<float> positionDist(-5.f, 5.f);
-	std::uniform_real_distribution<float> velocityDist(-1.f, 1.f);
+	std::uniform_real_distribution<float> positionDist(-1.f, 1.f);
+	std::uniform_real_distribution<float> velocityDist(-50.f, 50.f);
 	std::uniform_real_distribution<float> secondsToLiveDist(1.f, 10.f);
 
 	std::vector<ParticleData> data;
@@ -152,7 +123,7 @@ void ParticleSystem::GenerateRandomParticels(glm::vec3 location, int num)
 	for (int i = 0; i < num; ++i)
 	{
 		data[i].position = location + glm::vec3{ positionDist(rand), positionDist(rand), positionDist(rand) };
-		data[i].velocity = glm::vec3{ positionDist(rand), positionDist(rand), 1.f };
+		data[i].velocity = glm::vec3{ positionDist(rand), 3.f , positionDist(rand)};
 		data[i].secondsToLive = secondsToLiveDist(rand);
 	}
 
@@ -178,14 +149,8 @@ void ParticleSystem::AddParticles(const ParticleData* particles, int numberOfPar
 	std::array<ParticleData, 200> outData;
 	int dataToRead = std::min<int>(outData.size(), m_numCurrentParticles);
 	GetReadBuffer().GetBufferData(outData.data(), dataToRead, 0);
-	for (int i = 0; i < dataToRead; ++i)
-	{
-		std::printf("%d: time to live = %f \n", i, outData[i].secondsToLive);
-	}
-
 
 	GetReadBuffer().Unbind();
-
 }
 
 void ParticleSystem::Update(float DeltaSeconds)

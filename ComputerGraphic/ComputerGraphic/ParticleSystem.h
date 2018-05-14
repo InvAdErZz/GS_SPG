@@ -31,7 +31,7 @@ class ParticleSystem
 {
 public:
 	ParticleSystem();
-	void Init(int maxParticles);
+	void Init(int maxParticles, const char* updateVert, const char* updateGeo, const char* drawVert, const char* drawFrag);
 	void SetParticelMesh(const VertextAttribute* data, int numVertices);
 
 	void GenerateRandomParticels(glm::vec3 location, int num);

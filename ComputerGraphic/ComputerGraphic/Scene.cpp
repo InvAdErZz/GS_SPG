@@ -397,31 +397,35 @@ void Scene::Update(float deltaTime, const InputManager& inputManager)
 
 void Scene::UpdateFreeMovement(float deltaTime, const InputManager & inputManager)
 {
-	const glm::vec2 mousePosition = inputManager.GetMousePosition();
-	glm::vec3 euler(mousePosition.y *0.01, mousePosition.x *0.01f, 0);
+	if (inputManager.GetMouseMotion() != glm::vec2{ 0,0 })
+	{
+		const glm::vec2 mouseMotion = inputManager.GetMouseMotion();
 
-	m_camera.m_rotation = glm::dquat(euler);
+		const float scaling = 0.01f;
+		m_camera.UpdateFromMouse(mouseMotion.x * scaling, mouseMotion.y * scaling);
+	}
 
-	glm::vec3 forwardVector = glm::mat3_cast(m_camera.m_rotation) * glm::vec3(0, 0, 1);
-	glm::vec3 leftVector = glm::mat3_cast(m_camera.m_rotation) * glm::vec3(1, 0, 0);
+	float leftInput = 0.f;
+	float forwardInput = 0.f;
 
 	if (inputManager.GetKey(KeyCode::KEY_W).IsPressed())
 	{
-		m_camera.m_position += deltaTime * forwardVector * 10.f;
+		forwardInput += deltaTime * 10.f;
 	}
 	if (inputManager.GetKey(KeyCode::KEY_S).IsPressed())
 	{
-		m_camera.m_position -= deltaTime * forwardVector * 10.f;
+		forwardInput -= deltaTime * 10.f;
 	}
 
 	if (inputManager.GetKey(KeyCode::KEY_A).IsPressed())
 	{
-		m_camera.m_position += deltaTime * leftVector * 10.f;
+		leftInput += deltaTime * 10.f;
 	}
 	if (inputManager.GetKey(KeyCode::KEY_D).IsPressed())
 	{
-		m_camera.m_position -= deltaTime * leftVector * 10.f;
+		leftInput -= deltaTime * 10.f;
 	}
+	m_camera.UpdateLocation(forwardInput, leftInput);
 
 	if (inputManager.GetKey(KeyCode::KEY_1).GetNumPressed() > 0)
 	{

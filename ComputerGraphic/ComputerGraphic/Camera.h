@@ -11,6 +11,8 @@ public:
 	void SetPerspection(float nearPlane, float farPlane, float fieldOfView, glm::vec2 aspectRatio);
 	const glm::mat4& GetPerspectionMatrix() const;
 
+	void UpdateFromMouse(float yawInput, float pitchInput);
+	void UpdateLocation(float forwardInput, float leftInput);
 	glm::quat m_rotation;
 	glm::vec3 m_position;
 private:

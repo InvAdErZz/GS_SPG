@@ -2,8 +2,8 @@
 
 out float esmDepth;
 
-uniform float ExpModifier = 10.f;
+uniform float esmModifier = 10.f;
 void main(void) {
 
-	esmDepth = exp( gl_FragCoord.z * ExpModifier);
+	esmDepth = exp( gl_FragCoord.z * esmModifier);
 }

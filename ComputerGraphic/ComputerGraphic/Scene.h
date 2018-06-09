@@ -111,6 +111,9 @@ private:
 	int m_dispRefinementLayers = 2;
 	float m_dispScale = 0.0625;
 	bool m_useEsm;
+	float m_esmModifier;
+	int m_gausBlur;
+	bool m_printFramerate = false;
 	std::vector<GLsizei> m_allowedSampleSizes;
 
 	std::vector<glm::vec3> m_linesToDrawInWorldSpace;

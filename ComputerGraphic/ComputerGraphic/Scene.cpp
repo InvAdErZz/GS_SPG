@@ -30,6 +30,8 @@ namespace
 	const std::string DISPLACEMENT_REFINEMENT_LAYERS_UNIFORM_NAME("numRefinementLayers");
 	const std::string DISPLACEMENT_HEIGHT_UNIFORM_NAME("dispHeight");
 	const std::string USE_ESM_UNIFORM_NAME("useEsm");
+	const std::string ESM_MODIFIER_UNIFORM_NAME("esmModifier");
+
 
 
 
@@ -108,6 +110,8 @@ namespace
 
 void Scene::Init(const glm::ivec2& ViewPort)
 {
+	m_gausBlur = 1;
+	m_esmModifier = 10.f;
 	m_useEsm = true;
 	m_viewPort = ViewPort;
 
@@ -179,7 +183,8 @@ void Scene::Init(const glm::ivec2& ViewPort)
 		CAMERA_POS_UNIFORM_NAME,
 		NORMAL_MAP_UNIFORM_NAME,
 		ROUGHNESS_UNIFORM_NAME,
-		USE_ESM_UNIFORM_NAME
+		USE_ESM_UNIFORM_NAME,
+		ESM_MODIFIER_UNIFORM_NAME
 		});
 
 	for (int i = 0; i < LightCount; ++i)
@@ -240,6 +245,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 
 	m_program.UseProgram();
 	m_program.SetBoolUniform(m_useEsm, USE_ESM_UNIFORM_NAME);
+	m_program.SetFloatUniform(m_esmModifier, ESM_MODIFIER_UNIFORM_NAME);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 0.f, 0.f), glm::vec4(1.0f, 0.f, 0.f, 1.f), 0);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 0.f, -10.f), glm::vec4(0.0f, 1.f, 0.f, 1.f), 1);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, -5.f, -10.f), glm::vec4(1.0f, 0.f, 1.f, 1.f), 2);
@@ -415,15 +421,49 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_esmShadowMapProgram.BindAttributeLocation(VertextAttribute::NORMAL_ATTRIBUTE_LOCATION, VertextAttribute::NORMAL_ATTRIBUTE_NAME);
 	m_esmShadowMapProgram.BindAttributeLocation(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION, VertextAttribute::TEXCOORD_ATTRIBUTE_NAME);
 	m_esmShadowMapProgram.LinkShaders();
-	m_esmShadowMapProgram.FindUniforms({ VIEW_PROJECTION_UNIFORM_NAME, MODEL_MATRIX_UNIFORM_NAME });
+	m_esmShadowMapProgram.FindUniforms({ VIEW_PROJECTION_UNIFORM_NAME, MODEL_MATRIX_UNIFORM_NAME, ESM_MODIFIER_UNIFORM_NAME });
 	m_gausFilterer.Init();
 }
 
 void Scene::Update(float deltaTime, const InputManager& inputManager)
 {
+	if (m_printFramerate)
+	{
+		printf("framerate is now: %f\n",  60.f / deltaTime);
+	}
 	for (auto& ps : m_particleSystem)
 	{
 		ps.Update(deltaTime * m_particleUpdateRateModifier);
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_T).GetNumPressed() > 0)
+	{
+		m_printFramerate = !m_printFramerate;
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_X).GetNumPressed() > 0)
+	{
+
+		m_esmModifier = std::min(20.f, m_esmModifier + 1);
+		printf("esmModifier is now: %f\n", m_esmModifier);
+	}
+	if (inputManager.GetKey(KeyCode::KEY_Y).GetNumPressed() > 0)
+	{
+		m_esmModifier = std::max(5.f, m_esmModifier - 1);
+		printf("esmModifier is now: %f\n", m_esmModifier);
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_G).GetNumPressed() > 0)
+	{
+		m_gausBlur *= 2;
+		// base radius is 3, is defined in shader
+		printf("Gaus Radius is now is now: %i\n", m_gausBlur * 3);
+	}
+	if (inputManager.GetKey(KeyCode::KEY_H).GetNumPressed() > 0)
+	{
+		m_gausBlur = std::max(m_gausBlur / 2, 1);
+		// base radius is 3, is defined in shader
+		printf("Gaus Radius is now is now: %i\n", m_gausBlur * 3);
 	}
 
 	if (inputManager.GetKey(KeyCode::PLUS).GetNumPressed() > 0)
@@ -661,6 +701,8 @@ void Scene::UpdatePathFollowing(float deltaTime, const InputManager& inputManage
 
 void Scene::Render()
 {
+
+
 	if (m_useEsm)
 	{
 		EsmShadowMapPass();
@@ -759,6 +801,7 @@ void Scene::EsmShadowMapPass()
 	m_esmShadowFrameBuffer.Bind();
 	glViewport(0, 0, shadowDimensions.x, shadowDimensions.y);
 	m_esmShadowMapProgram.UseProgram(); // TODO
+	m_esmShadowMapProgram.SetFloatUniform(m_esmModifier, ESM_MODIFIER_UNIFORM_NAME);
 
 
 	ASSERT_GL_ERROR_MACRO();
@@ -791,7 +834,7 @@ void Scene::EsmShadowMapPass()
 		{
 			continue;
 		}
-		m_gausFilterer.Filter(m_esmShadowDepthTextures[LightIndex], m_esmShadowDepthTemporaryTexture, 15);
+		m_gausFilterer.Filter(m_esmShadowDepthTextures[LightIndex], m_esmShadowDepthTemporaryTexture, m_gausBlur);
 	}
 }
 

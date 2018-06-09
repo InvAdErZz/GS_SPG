@@ -29,6 +29,7 @@ namespace
 	const std::string DISPLACEMENT_LAYERS_UNIFORM_NAME("numLayers");
 	const std::string DISPLACEMENT_REFINEMENT_LAYERS_UNIFORM_NAME("numRefinementLayers");
 	const std::string DISPLACEMENT_HEIGHT_UNIFORM_NAME("dispHeight");
+	const std::string USE_ESM_UNIFORM_NAME("useEsm");
 
 
 
@@ -107,6 +108,7 @@ namespace
 
 void Scene::Init(const glm::ivec2& ViewPort)
 {
+	m_useEsm = true;
 	m_viewPort = ViewPort;
 
 	if (!m_rockShaderProgram.CreateShaders("../Shader/rock.vert", "../Shader/rock.frag"))
@@ -176,7 +178,8 @@ void Scene::Init(const glm::ivec2& ViewPort)
 		INVERSE_TRANSPOSED_MODEL_MATRIX_UNIFORM_NAME,
 		CAMERA_POS_UNIFORM_NAME,
 		NORMAL_MAP_UNIFORM_NAME,
-		ROUGHNESS_UNIFORM_NAME
+		ROUGHNESS_UNIFORM_NAME,
+		USE_ESM_UNIFORM_NAME
 		});
 
 	for (int i = 0; i < LightCount; ++i)
@@ -236,7 +239,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	}
 
 	m_program.UseProgram();
-
+	m_program.SetBoolUniform(m_useEsm, USE_ESM_UNIFORM_NAME);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 0.f, 0.f), glm::vec4(1.0f, 0.f, 0.f, 1.f), 0);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 0.f, -10.f), glm::vec4(0.0f, 1.f, 0.f, 1.f), 1);
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, -5.f, -10.f), glm::vec4(1.0f, 0.f, 1.f, 1.f), 2);
@@ -335,7 +338,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_mcLookup.WriteLookupTablesToGpu();
 	m_rock.Init();
 	m_rock.GenerateMesh(m_mcLookup,0.f);
-	m_rock.GeneratedKdTree(rockModelMat);
+	//m_rock.GeneratedKdTree(rockModelMat);
 
 	{
 		m_particleSystem[0].Init(
@@ -373,6 +376,38 @@ void Scene::Init(const glm::ivec2& ViewPort)
 		VIEW_PROJECTION_UNIFORM_NAME,
 		COLOR_UNIFORM_NAME
 		});
+
+	m_esmDepthTexture.Create();
+	m_esmDepthTexture.Bind();
+	m_esmDepthTexture.TextureImage(0, GL_DEPTH_COMPONENT, shadowDimensions.x, shadowDimensions.y, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	m_esmDepthTexture.SetNearestNeighbourFiltering();
+	m_esmDepthTexture.SetClampToEdge();
+	m_esmDepthTexture.Unbind();
+	
+	m_esmShadowFrameBuffer.Create();
+	m_esmShadowFrameBuffer.Bind();
+	m_esmShadowFrameBuffer.BindTexture(GL_DEPTH_ATTACHMENT, m_esmDepthTexture.GetHandle(), 0);
+	m_esmShadowFrameBuffer.Unbind();
+	
+	for (Texture& tex : m_esmShadowDepthTextures)
+	{
+		tex.Create();
+		tex.Bind();
+		tex.TextureImage(0, GL_R32F, shadowDimensions.x, shadowDimensions.y, GL_RED, GL_FLOAT, nullptr);
+		tex.SetNearestNeighbourFiltering();
+		tex.SetClampBorder(glm::vec4(0.f, 0.f, 0.f, 1.f));
+		tex.Unbind();
+	}
+
+	if (!m_esmShadowMapProgram.CreateShaders("../Shader/esmShadowmap.vert", "../Shader/esmShadowmap.frag"))
+	{
+		assert(false);
+	}
+	m_esmShadowMapProgram.BindAttributeLocation(VertextAttribute::POSITION_ATTRIBUTE_LOCATION, VertextAttribute::POSITION_ATTRIBUTE_NAME);
+	m_esmShadowMapProgram.BindAttributeLocation(VertextAttribute::NORMAL_ATTRIBUTE_LOCATION, VertextAttribute::NORMAL_ATTRIBUTE_NAME);
+	m_esmShadowMapProgram.BindAttributeLocation(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION, VertextAttribute::TEXCOORD_ATTRIBUTE_NAME);
+	m_esmShadowMapProgram.LinkShaders();
+	m_esmShadowMapProgram.FindUniforms({ VIEW_PROJECTION_UNIFORM_NAME, MODEL_MATRIX_UNIFORM_NAME });
 }
 
 void Scene::Update(float deltaTime, const InputManager& inputManager)
@@ -617,13 +652,21 @@ void Scene::UpdatePathFollowing(float deltaTime, const InputManager& inputManage
 
 void Scene::Render()
 {
-	for (int i = 0; i < LightCount; ++i)
+	if (m_useEsm)
 	{
-		if (m_isLightActive[i]) // save performance
+		EsmShadowMapPass();
+	}
+	else
+	{
+		for (int i = 0; i < LightCount; ++i)
 		{
-			ShadowMapPass(i);
+			if (m_isLightActive[i]) // save performance
+			{
+				ShadowMapPass(i);
+			}
 		}
 	}
+
 	RenderScenePass();
 	PostProcessPass();
 }
@@ -700,6 +743,43 @@ void Scene::ShadowMapPass(int LightIndex)
 	glCullFace(GL_BACK);
 }
 
+void Scene::EsmShadowMapPass()
+{
+	glCullFace(GL_FRONT);
+
+	m_esmShadowFrameBuffer.Bind();
+	glViewport(0, 0, shadowDimensions.x, shadowDimensions.y);
+	m_esmShadowMapProgram.UseProgram(); // TODO
+
+
+	ASSERT_GL_ERROR_MACRO();
+
+	m_esmShadowMapProgram.IsValid();
+	for (int LightIndex = 0; LightIndex < LightCount; LightIndex++)
+	{
+		if (!m_isLightActive[LightIndex])
+		{
+			continue;
+		}
+
+		m_esmShadowFrameBuffer.BindTexture(GL_COLOR_ATTACHMENT0, m_esmShadowDepthTextures[LightIndex].GetHandle(), 0);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+		m_esmShadowMapProgram.IsValid();
+		glm::mat4 viewProjection = m_spotlight[LightIndex].GetPerspectionMatrix() * m_spotlight[LightIndex].CalcViewMatrix();
+		m_esmShadowMapProgram.SetMatrixUniform(viewProjection, VIEW_PROJECTION_UNIFORM_NAME);
+
+		for (const auto& cubeData : m_cubeShaderDatas)
+		{
+			m_esmShadowMapProgram.SetMatrixUniform(glm::translate(glm::mat4(1.0), cubeData.position), MODEL_MATRIX_UNIFORM_NAME);
+			m_cubeMesh.Render();
+		}
+	}
+	m_esmShadowFrameBuffer.Unbind();
+	glCullFace(GL_BACK);
+
+}
+
+
 void Scene::RenderScenePass()
 {
 	if (m_allowedSampleSizes[m_sampleIndex] > 1)
@@ -728,7 +808,14 @@ void Scene::RenderScenePass()
 	for (int i = 0; i < LightCount; ++i)
 	{
 		m_program.SetSamplerTextureUnit(textureUnitCnt, SHADOW_MAP_UNIFORM_NAME_ARRAY[i]);
-		m_shadowDepthTexture[i].BindToTextureUnit(textureUnitCnt);
+		if (m_useEsm)
+		{
+			m_esmShadowDepthTextures[i].BindToTextureUnit(textureUnitCnt);
+		}
+		else
+		{
+			m_shadowDepthTexture[i].BindToTextureUnit(textureUnitCnt);
+		}
 		++textureUnitCnt;
 	}
 

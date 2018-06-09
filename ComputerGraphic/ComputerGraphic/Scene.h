@@ -43,6 +43,7 @@ private:
 	void UpdatePathFollowing(float deltaTime, const InputManager& inputManager);
 
 	void ShadowMapPass(int LightIndex);
+	void EsmShadowMapPass();
 	void RenderScenePass();
 	void PostProcessPass();
 	void RayTraceAndSpawnParticles(glm::vec2 mousePos);
@@ -57,6 +58,7 @@ private:
 	Camera m_camera;
 	ShaderProgram m_program;
 	ShaderProgram m_shadowMapProgram;
+	ShaderProgram m_esmShadowMapProgram;
 	ShaderProgram m_postProcessProgram;
 	ShaderProgram m_rockShaderProgram;
 
@@ -64,6 +66,7 @@ private:
 
 
 	FrameBuffer m_framebuffer;
+	FrameBuffer m_esmShadowFrameBuffer;
 	FrameBuffer m_msaaFrameBuffer;
 	LookupBuffer m_mcLookup;
 
@@ -75,11 +78,13 @@ private:
 	Texture m_rockColor;
 	Texture m_rockNormal;
 	Texture m_rockDisp;
+	Texture m_esmDepthTexture;
 
 	std::array<Texture, 3> m_normalMaps;
 
 	std::array<FrameBuffer,LightCount> m_shadowFrameBuffer;
 	std::array<Texture, LightCount> m_shadowDepthTexture;
+	std::array<Texture, LightCount> m_esmShadowDepthTextures;
 	std::array<SpotLight, LightCount> m_spotlight;
 	std::array<bool, LightCount> m_isLightActive;
 
@@ -100,7 +105,7 @@ private:
 	int m_dispLayers = 2;
 	int m_dispRefinementLayers = 2;
 	float m_dispScale = 0.0625;
-
+	bool m_useEsm;
 	std::vector<GLsizei> m_allowedSampleSizes;
 
 	std::vector<glm::vec3> m_linesToDrawInWorldSpace;

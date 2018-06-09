@@ -16,13 +16,37 @@ in vec2 FragTexCoord;
 uniform sampler2D shadowmap[maxLights];
 uniform sampler2D normalMap;
 uniform bool isLightActive[maxLights];
+uniform bool useEsm = false;
 uniform vec3 lightPos[maxLights];
 uniform vec3 cameraPos;
 uniform float ambient = 0.2;
 uniform float roughness;
 
+uniform float ExpModifier = 1.f;
+
 const vec3 defaultNormal = vec3(0,0,1);
 
+/* 0 means in shadow, 1 means in light*/
+float EsmShadowMuliplier(vec4 fragcoordInLightspace, int lightIndex)
+{
+	vec3 projCoords = fragcoordInLightspace.xyz / fragcoordInLightspace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+	
+	if(projCoords.x < 0.f || projCoords.x > 1.f
+	|| projCoords.y < 0.f || projCoords.y > 1.f)
+	{
+		return 0.f;
+	}
+	
+	/* exp(ExpModifier*z)*/
+    float esmValue = texture(shadowmap[lightIndex], projCoords.xy).r; 
+	
+	/* exp(ExpModifier*z) * exp(-ExpModifier*d) */
+    float shadowMultiplier = clamp(esmValue * exp(-ExpModifier * projCoords.z), 0, 1);
+
+	
+	return 1.f - shadowMultiplier;
+}
 
 bool IsInShadow(vec4 fragcoordInLightspace, int lightIndex)
 {
@@ -42,6 +66,12 @@ bool IsInShadow(vec4 fragcoordInLightspace, int lightIndex)
 	return currentDepth > closestDepth;
 }
 
+float IsInShadowAsMultiplier(vec4 fragcoordInLightspace, int lightIndex)
+{
+	bool bIsInShadow = IsInShadow(fragcoordInLightspace, lightIndex);
+	return bIsInShadow ? 0.f : 1.f;
+}
+
 vec3 GetNormalTangentSpace()
 {	
 		
@@ -58,18 +88,17 @@ void main(void) {
 	for(int i = 0; i < maxLights; ++i)
 	{
 		if(isLightActive[i]){
-			if(!IsInShadow(FragPosLightSpace[i], i))
-			{
-				vec3 normalTS = GetNormalTangentSpace();
-				vec3 lightDirTS = normalize(LightDirTangentSpace[i]);
-				vec3 reflectDirTS = reflect(lightDirTS, normalTS);
-				
-				float diffuse = max(0,dot(normalTS, lightDirTS));
-				float specular = max(0,dot(viewDirTS, reflectDirTS));
-				specular = pow(specular, 20);
-				totalLight += diffuse +
-				specular;
-			}
+			vec3 normalTS = GetNormalTangentSpace();
+			vec3 lightDirTS = normalize(LightDirTangentSpace[i]);
+			vec3 reflectDirTS = reflect(lightDirTS, normalTS);
+			
+			float diffuse = max(0,dot(normalTS, lightDirTS));
+			float specular = max(0,dot(viewDirTS, reflectDirTS));
+			specular = pow(specular, 20);
+			float AllLightComponents = diffuse + specular;
+			float shadowMultiplier = useEsm ? EsmShadowMuliplier(FragPosLightSpace[i], i) : IsInShadowAsMultiplier(FragPosLightSpace[i], i);
+			AllLightComponents *= shadowMultiplier;
+			totalLight += AllLightComponents;			
 		}
 	}
 	color = ex_Color.xyz * (totalLight);

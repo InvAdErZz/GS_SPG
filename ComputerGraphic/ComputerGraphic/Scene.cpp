@@ -399,6 +399,14 @@ void Scene::Init(const glm::ivec2& ViewPort)
 		tex.Unbind();
 	}
 
+	
+	m_esmShadowDepthTemporaryTexture.Create();
+	m_esmShadowDepthTemporaryTexture.Bind();
+	m_esmShadowDepthTemporaryTexture.TextureImage(0, GL_R32F, shadowDimensions.x, shadowDimensions.y, GL_RED, GL_FLOAT, nullptr);
+	m_esmShadowDepthTemporaryTexture.SetNearestNeighbourFiltering();
+	m_esmShadowDepthTemporaryTexture.SetClampBorder(glm::vec4(0.f, 0.f, 0.f, 1.f));
+	m_esmShadowDepthTemporaryTexture.Unbind();
+
 	if (!m_esmShadowMapProgram.CreateShaders("../Shader/esmShadowmap.vert", "../Shader/esmShadowmap.frag"))
 	{
 		assert(false);
@@ -408,6 +416,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_esmShadowMapProgram.BindAttributeLocation(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION, VertextAttribute::TEXCOORD_ATTRIBUTE_NAME);
 	m_esmShadowMapProgram.LinkShaders();
 	m_esmShadowMapProgram.FindUniforms({ VIEW_PROJECTION_UNIFORM_NAME, MODEL_MATRIX_UNIFORM_NAME });
+	m_gausFilterer.Init();
 }
 
 void Scene::Update(float deltaTime, const InputManager& inputManager)
@@ -776,7 +785,14 @@ void Scene::EsmShadowMapPass()
 	}
 	m_esmShadowFrameBuffer.Unbind();
 	glCullFace(GL_BACK);
-
+	for (int LightIndex = 0; LightIndex < LightCount; LightIndex++)
+	{
+		if (!m_isLightActive[LightIndex])
+		{
+			continue;
+		}
+		m_gausFilterer.Filter(m_esmShadowDepthTextures[LightIndex], m_esmShadowDepthTemporaryTexture, 15);
+	}
 }
 
 

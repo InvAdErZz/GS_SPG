@@ -167,6 +167,7 @@
     <ClInclude Include="CubeShaderData.h" />
     <ClInclude Include="DynamicLight.h" />
     <ClInclude Include="FrameBuffer.h" />
+    <ClInclude Include="GausFilterer.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="KdTree.h" />
     <ClInclude Include="KdTreeTraverser.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="ComputerGraphic.cpp" />
     <ClCompile Include="DynamicLight.cpp" />
     <ClCompile Include="ExternalImplementations.cpp" />
+    <ClCompile Include="GausFilterer.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="KdTree.cpp" />

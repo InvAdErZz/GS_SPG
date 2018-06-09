@@ -144,6 +144,9 @@
     <ClInclude Include="LineMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GausFilterer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -219,6 +222,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LineMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GausFilterer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

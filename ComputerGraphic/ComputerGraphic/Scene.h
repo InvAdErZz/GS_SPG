@@ -18,6 +18,7 @@
 #include "LookupBuffer.h"
 #include "ProceduralMesh.h"
 #include "ParticleSystem.h"
+#include "GausFilterer.h"
 
 enum class PathFollower
 {
@@ -48,6 +49,8 @@ private:
 	void PostProcessPass();
 	void RayTraceAndSpawnParticles(glm::vec2 mousePos);
 	void DrawLines();
+
+	GausFilterer m_gausFilterer;
 
 	Mesh m_cubeMesh;
 	MeshIndexed m_screenTriangleMesh;
@@ -85,6 +88,8 @@ private:
 	std::array<FrameBuffer,LightCount> m_shadowFrameBuffer;
 	std::array<Texture, LightCount> m_shadowDepthTexture;
 	std::array<Texture, LightCount> m_esmShadowDepthTextures;
+	// used for bluring
+	Texture m_esmShadowDepthTemporaryTexture;
 	std::array<SpotLight, LightCount> m_spotlight;
 	std::array<bool, LightCount> m_isLightActive;
 

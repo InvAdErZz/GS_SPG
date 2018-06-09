@@ -111,7 +111,7 @@ namespace
 void Scene::Init(const glm::ivec2& ViewPort)
 {
 	m_gausBlur = 1;
-	m_esmModifier = 10.f;
+	m_esmModifier = 80.f;
 	m_useEsm = true;
 	m_viewPort = ViewPort;
 
@@ -444,12 +444,12 @@ void Scene::Update(float deltaTime, const InputManager& inputManager)
 	if (inputManager.GetKey(KeyCode::KEY_X).GetNumPressed() > 0)
 	{
 
-		m_esmModifier = std::min(20.f, m_esmModifier + 1);
+		m_esmModifier *= 1.1f;// = std::min(20.f, m_esmModifier + 0.2f);
 		printf("esmModifier is now: %f\n", m_esmModifier);
 	}
 	if (inputManager.GetKey(KeyCode::KEY_Y).GetNumPressed() > 0)
 	{
-		m_esmModifier = std::max(5.f, m_esmModifier - 1);
+		m_esmModifier /= 1.1f;// std::max(5.f, m_esmModifier - 0.2f);
 		printf("esmModifier is now: %f\n", m_esmModifier);
 	}
 
@@ -820,6 +820,9 @@ void Scene::EsmShadowMapPass()
 		glm::mat4 viewProjection = m_spotlight[LightIndex].GetPerspectionMatrix() * m_spotlight[LightIndex].CalcViewMatrix();
 		m_esmShadowMapProgram.SetMatrixUniform(viewProjection, VIEW_PROJECTION_UNIFORM_NAME);
 
+		m_esmShadowMapProgram.SetMatrixUniform(glm::translate(glm::scale(glm::vec3{ 50.f,1.f,50.f }), glm::vec3(0.f, -10.f, 0.f)), MODEL_MATRIX_UNIFORM_NAME);
+		m_cubeMesh.Render();
+
 		for (const auto& cubeData : m_cubeShaderDatas)
 		{
 			m_esmShadowMapProgram.SetMatrixUniform(glm::translate(glm::mat4(1.0), cubeData.position), MODEL_MATRIX_UNIFORM_NAME);
@@ -828,6 +831,8 @@ void Scene::EsmShadowMapPass()
 	}
 	m_esmShadowFrameBuffer.Unbind();
 	glCullFace(GL_BACK);
+
+
 	for (int LightIndex = 0; LightIndex < LightCount; LightIndex++)
 	{
 		if (!m_isLightActive[LightIndex])
@@ -856,6 +861,7 @@ void Scene::RenderScenePass()
 
 
 	m_program.UseProgram();
+	m_program.SetFloatUniform(m_esmModifier, ESM_MODIFIER_UNIFORM_NAME);
 
 	glViewport(0, 0, m_viewPort.x, m_viewPort.y);
 

@@ -22,7 +22,7 @@ uniform vec3 cameraPos;
 uniform float ambient = 0.2;
 uniform float roughness;
 
-uniform float esmModifier = 10.f;
+uniform float esmModifier = 80.f;
 
 const vec3 defaultNormal = vec3(0,0,1);
 
@@ -41,13 +41,12 @@ float EsmShadowMuliplier(vec4 fragcoordInLightspace, int lightIndex)
 	/* exp(esmModifier*z)*/
     float esmValue = texture(shadowmap[lightIndex], projCoords.xy).r; 
 	
-	
-	float currentDepth = projCoords.z+ 0.04;
+	float currentDepth = projCoords.z;
 	/* exp(esmModifier*z) * exp(-esmModifier*d) */
+	
     float shadowMultiplier = clamp(esmValue * exp(-esmModifier * currentDepth), 0, 1);
 
-	
-	return 1.f-shadowMultiplier;
+	return shadowMultiplier;
 }
 
 bool IsInShadow(vec4 fragcoordInLightspace, int lightIndex)

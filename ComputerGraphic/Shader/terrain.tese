@@ -34,7 +34,7 @@ void main(){
 
     float normalizedHeight = texture(heightMap, uv).r;
 	float height = normalizedHeight * maxHeight;
-   // wsPos += terrainNormal * height;
+    wsPos += terrainNormal * height;
 	
 	tese_out.wsPos = wsPos;
 	tese_out.uv = uv;

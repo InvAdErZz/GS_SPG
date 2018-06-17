@@ -26,7 +26,8 @@ void main(void) {
 	
 	for(int i = 0; i < maxLights; ++i)
 	{
-		if(isLightActive[i]){		
+		//if(isLightActive[i])
+		{		
 			vec3 lightDir = normalize(lightPos[0] - geo_in.wsPos);
 			vec3 reflectDir = reflect(lightDir, normal);
 			

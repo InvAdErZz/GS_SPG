@@ -89,8 +89,8 @@ void Terrain::Draw(const glm::mat4& viewProjectionMatrix, const SpotLight* light
 {
 	m_terrainShaderProgram.UseProgram();
 	m_terrainShaderProgram.SetFloatUniform(m_maxHeight, MaxHeightUniformName);
-	m_terrainShaderProgram.SetFloatUniform(1.f, InnerTessLevelUniformName);
-	m_terrainShaderProgram.SetFloatUniform(1.f, OuterTessLevelUniformName);
+	m_terrainShaderProgram.SetFloatUniform(m_halfExtent.x, InnerTessLevelUniformName);
+	m_terrainShaderProgram.SetFloatUniform(m_halfExtent.x, OuterTessLevelUniformName);
 
 	m_terrainShaderProgram.SetVec3Uniform(m_terrainNormal, TerrainNormalUniformName);
 	m_terrainShaderProgram.SetVec3Uniform(m_terrainBitangent, TerrainBitangentUniformName);

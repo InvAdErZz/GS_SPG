@@ -426,7 +426,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_esmShadowMapProgram.FindUniforms({ ViewProjectionUniformName, MODEL_MATRIX_UNIFORM_NAME, ESM_MODIFIER_UNIFORM_NAME });
 	m_gausFilterer.Init();
 
-	m_terrain.Init(glm::vec2(10.f,10.f),glm::vec3(0.f,50.f,0.f), 20.f,"../Textures/Stone_02/disp.jpg");
+	m_terrain.Init(glm::vec2(100.f,100.f),glm::vec3(160.f,-30.f,0.f), 20.f,"../Textures/Stone_02/disp.jpg");
 }
 
 

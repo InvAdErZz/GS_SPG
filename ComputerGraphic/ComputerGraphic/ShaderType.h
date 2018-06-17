@@ -8,7 +8,9 @@ enum class ShaderType
 {
 	Vertex,
 	Fragment,
-	Geometry
+	Geometry,
+	TesselationControll,
+	TesselationEvaluation
 };
 
 constexpr GLenum GetShaderType(ShaderType shaderType)
@@ -21,6 +23,10 @@ constexpr GLenum GetShaderType(ShaderType shaderType)
 		return GL_FRAGMENT_SHADER;
 	case ShaderType::Geometry:
 		return GL_GEOMETRY_SHADER;
+	case ShaderType::TesselationControll:
+		return GL_TESS_CONTROL_SHADER;
+	case ShaderType::TesselationEvaluation:
+		return GL_TESS_EVALUATION_SHADER;
 	default:
 		assert(false);
 		return std::numeric_limits<GLenum>::max();

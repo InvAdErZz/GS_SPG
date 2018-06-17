@@ -19,6 +19,7 @@
 #include "ProceduralMesh.h"
 #include "ParticleSystem.h"
 #include "GausFilterer.h"
+#include "Terrain.h"
 
 enum class PathFollower
 {
@@ -67,6 +68,7 @@ private:
 
 	ShaderProgram m_lineShaderProgram;
 
+	Terrain m_terrain;
 
 	FrameBuffer m_framebuffer;
 	FrameBuffer m_esmShadowFrameBuffer;

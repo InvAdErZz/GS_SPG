@@ -35,6 +35,8 @@ public:
 	void SetMatrixUniform(const glm::mat4& matrix, const std::string& UniformName);
 	void SetVec4Uniform(const glm::vec4 vector, const std::string& UniformName);
 	void SetVec3Uniform(const glm::vec3 vector, const std::string& UniformName);
+	void SetVec2Uniform(const glm::vec2 vector, const std::string& UniformName);
+
 	void SetBoolUniform(bool value, const std::string& UniformName);
 	void SetIntUniform(int value, const std::string & UniformName);
 	void SetFloatUniform(float value, const std::string& UniformName);

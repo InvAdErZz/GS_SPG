@@ -13,7 +13,7 @@ namespace
 
 	const glm::ivec2 shadowDimensions(1024, 1024);
 
-	const std::string VIEW_PROJECTION_UNIFORM_NAME("viewProjection");
+	const std::string ViewProjectionUniformName("viewProjection");
 	const std::string COLOR_UNIFORM_NAME("color");
 	const std::string MODEL_MATRIX_UNIFORM_NAME("model");
 	const std::string RENDERED_SCENE_TEXTURE_UNIFORM_NAME("renderedscene");
@@ -124,7 +124,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 
 	m_rockShaderProgram.LinkShaders();
 	m_rockShaderProgram.FindUniforms({
-		VIEW_PROJECTION_UNIFORM_NAME,
+		ViewProjectionUniformName,
 		MODEL_MATRIX_UNIFORM_NAME,
 		INVERSE_TRANSPOSED_MODEL_MATRIX_UNIFORM_NAME,
 		CAMERA_POS_UNIFORM_NAME,
@@ -176,7 +176,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_program.LinkShaders();
 
 	m_program.FindUniforms({
-		VIEW_PROJECTION_UNIFORM_NAME,
+		ViewProjectionUniformName,
 		COLOR_UNIFORM_NAME,
 		MODEL_MATRIX_UNIFORM_NAME,
 		INVERSE_TRANSPOSED_MODEL_MATRIX_UNIFORM_NAME,
@@ -215,7 +215,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 
 
 	m_shadowMapProgram.FindUniforms({
-		VIEW_PROJECTION_UNIFORM_NAME,
+		ViewProjectionUniformName,
 		MODEL_MATRIX_UNIFORM_NAME,
 		});
 
@@ -255,6 +255,8 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 0.f, 10.f), glm::vec4(0.3f, 0.3f, 0.3f, 1.f), 0);
 	m_cubeShaderDatas.emplace_back(glm::vec3(20.f, 0.f, -10.f), glm::vec4(1.0f, 1.f, 1.f, 1.f), 1);
 	m_cubeShaderDatas.emplace_back(glm::vec3(30.f, 0.f, -10.f), glm::vec4(0.0f, 0.f, 0.f, 1.f), 2);
+	m_cubeShaderDatas.emplace_back(glm::vec3(0.f, 50.f, 0.f), glm::vec4(0.0f, 1.f, 1.f, 1.f), 2);
+
 
 	glm::vec3 size(1.f, 1.f, 1.f);
 	const auto CubeVertexData = MeshCreation::LoadFromFile(CUBE_MESH_PATH)[0];
@@ -379,7 +381,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_lineShaderProgram.LinkShaders();
 
 	m_lineShaderProgram.FindUniforms({
-		VIEW_PROJECTION_UNIFORM_NAME,
+		ViewProjectionUniformName,
 		COLOR_UNIFORM_NAME
 		});
 
@@ -421,9 +423,17 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_esmShadowMapProgram.BindAttributeLocation(VertextAttribute::NORMAL_ATTRIBUTE_LOCATION, VertextAttribute::NORMAL_ATTRIBUTE_NAME);
 	m_esmShadowMapProgram.BindAttributeLocation(VertextAttribute::TEXTCOORD_ATTRIBUTE_LOCATION, VertextAttribute::TEXCOORD_ATTRIBUTE_NAME);
 	m_esmShadowMapProgram.LinkShaders();
-	m_esmShadowMapProgram.FindUniforms({ VIEW_PROJECTION_UNIFORM_NAME, MODEL_MATRIX_UNIFORM_NAME, ESM_MODIFIER_UNIFORM_NAME });
+	m_esmShadowMapProgram.FindUniforms({ ViewProjectionUniformName, MODEL_MATRIX_UNIFORM_NAME, ESM_MODIFIER_UNIFORM_NAME });
 	m_gausFilterer.Init();
+
+	m_terrain.Init(glm::vec2(10.f,10.f),glm::vec3(0.f,50.f,0.f), 20.f,"../Textures/Stone_02/disp.jpg");
 }
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
 
 void Scene::Update(float deltaTime, const InputManager& inputManager)
 {
@@ -780,7 +790,7 @@ void Scene::ShadowMapPass(int LightIndex)
 
 	m_shadowMapProgram.IsValid();
 	glm::mat4 viewProjection = m_spotlight[LightIndex].GetPerspectionMatrix() * m_spotlight[LightIndex].CalcViewMatrix();
-	m_shadowMapProgram.SetMatrixUniform(viewProjection, VIEW_PROJECTION_UNIFORM_NAME);
+	m_shadowMapProgram.SetMatrixUniform(viewProjection, ViewProjectionUniformName);
 
 	m_shadowMapProgram.SetMatrixUniform(glm::translate(glm::scale(glm::vec3{ 50.f,1.f,50.f }), glm::vec3(0.f, -10.f, 0.f)), MODEL_MATRIX_UNIFORM_NAME);
 	m_cubeMesh.Render();
@@ -818,7 +828,7 @@ void Scene::EsmShadowMapPass()
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		m_esmShadowMapProgram.IsValid();
 		glm::mat4 viewProjection = m_spotlight[LightIndex].GetPerspectionMatrix() * m_spotlight[LightIndex].CalcViewMatrix();
-		m_esmShadowMapProgram.SetMatrixUniform(viewProjection, VIEW_PROJECTION_UNIFORM_NAME);
+		m_esmShadowMapProgram.SetMatrixUniform(viewProjection, ViewProjectionUniformName);
 
 		m_esmShadowMapProgram.SetMatrixUniform(glm::translate(glm::scale(glm::vec3{ 50.f,1.f,50.f }), glm::vec3(0.f, -10.f, 0.f)), MODEL_MATRIX_UNIFORM_NAME);
 		m_cubeMesh.Render();
@@ -887,7 +897,7 @@ void Scene::RenderScenePass()
 
 	glm::mat4 viewProjection = m_camera.GetPerspectionMatrix() * m_camera.CalcViewMatrix();
 
-	m_program.SetMatrixUniform(viewProjection, VIEW_PROJECTION_UNIFORM_NAME);
+	m_program.SetMatrixUniform(viewProjection, ViewProjectionUniformName);
 
 	for (int i = 0; i < LightCount; ++i)
 	{
@@ -981,7 +991,7 @@ void Scene::RenderScenePass()
 	m_rockShaderProgram.SetSamplerTextureUnit(2, DISPLACEMENT_TEX_UNIFORM_NAME);
 	m_rockDisp.BindToTextureUnit(2);
 	
-	m_rockShaderProgram.SetMatrixUniform(viewProjection, VIEW_PROJECTION_UNIFORM_NAME);
+	m_rockShaderProgram.SetMatrixUniform(viewProjection, ViewProjectionUniformName);
 	m_rockShaderProgram.SetVec3Uniform(m_camera.m_position, CAMERA_POS_UNIFORM_NAME);
 
 	for (int i = 0; i < LightCount; ++i)
@@ -997,6 +1007,8 @@ void Scene::RenderScenePass()
 	{
 		ps.Draw(viewProjection);
 	}
+
+	m_terrain.Draw(viewProjection, m_spotlight.data(), m_spotlight.size());
 
 	DrawLines();
 
@@ -1066,7 +1078,7 @@ void Scene::DrawLines()
 	m_lineShaderProgram.UseProgram();
 	m_lineShaderProgram.SetVec4Uniform(glm::vec4(1, 0, 0, 1), COLOR_UNIFORM_NAME);
 	glm::mat4 viewProjection = m_camera.GetPerspectionMatrix() * m_camera.CalcViewMatrix();
-	m_lineShaderProgram.SetMatrixUniform(viewProjection, VIEW_PROJECTION_UNIFORM_NAME);
+	m_lineShaderProgram.SetMatrixUniform(viewProjection, ViewProjectionUniformName);
 	lines.Render();
 }
 

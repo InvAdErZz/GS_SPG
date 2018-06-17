@@ -22,7 +22,7 @@ namespace
 	const std::string DENSITY_TEXTURE_UNIFORM_NAME("densityTex");
 	const std::string NORMAL_AMBIENT_TEXTURE_UNIFORM_NAME("normalAmbientTex");
 
-	const std::string VIEW_PROJECTION_UNIFORM_NAME("viewProjection");
+	const std::string ViewProjectionUniformName("viewProjection");
 	const std::string COLOR_UNIFORM_NAME("color");
 	const std::string MODEL_MATRIX_UNIFORM_NAME("model");
 

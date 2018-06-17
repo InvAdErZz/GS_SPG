@@ -205,6 +205,17 @@ void ShaderProgram::SetVec3Uniform(const glm::vec3 vector, const std::string & U
 	ASSERT_GL_ERROR_MACRO();
 }
 
+void ShaderProgram::SetVec2Uniform(const glm::vec2 vector, const std::string & UniformName)
+{
+	assert(IsInUse());
+	auto foundItem = m_uniformLocations.find(UniformName);
+	assert(foundItem != m_uniformLocations.end());
+
+	GLuint uniformLocation = foundItem->second;
+	glUniform2f(uniformLocation, vector.x, vector.y);
+	ASSERT_GL_ERROR_MACRO();
+}
+
 void ShaderProgram::SetBoolUniform(bool value, const std::string & UniformName)
 {
 	assert(IsInUse());

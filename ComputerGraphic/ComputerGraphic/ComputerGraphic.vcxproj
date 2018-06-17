@@ -178,6 +178,7 @@
     <ClInclude Include="Query.h" />
     <ClInclude Include="RayTriangleIntersector.h" />
     <ClInclude Include="RenderBuffer.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture2DMutlisample.h" />
     <ClInclude Include="Texture3d.h" />
     <ClInclude Include="Triangle.h" />
@@ -233,6 +234,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -9,7 +9,7 @@ namespace
 {
 	const std::string DELTA_SECONDS_UNIFORM_NAME("deltaSeconds");
 
-	const std::string VIEW_PROJECTION_UNIFORM_NAME("viewProjection");
+	const std::string ViewProjectionUniformName("viewProjection");
 	const std::string MODEL_UNIFORM_NAME("model");
 	const std::string INVERSE_TRANSPOSED_MODEL_MATRIX_UNIFORM_NAME("inverseTransposedModelMat");
 
@@ -94,7 +94,7 @@ void ParticleSystem::Init(int maxParticles,const char* updateVert, const char* u
 
 		m_drawShader.LinkShaders();
 		m_drawShader.FindUniforms({
-			VIEW_PROJECTION_UNIFORM_NAME,
+			ViewProjectionUniformName,
 			MODEL_UNIFORM_NAME,
 			INVERSE_TRANSPOSED_MODEL_MATRIX_UNIFORM_NAME,
 		});
@@ -227,7 +227,7 @@ void ParticleSystem::Draw(const glm::mat4& ViewProjectionMatrix)
 	m_drawShader.SetMatrixUniform(identityMat, MODEL_UNIFORM_NAME);
 	m_drawShader.SetMatrixUniform(identityMat, INVERSE_TRANSPOSED_MODEL_MATRIX_UNIFORM_NAME);
 
-	m_drawShader.SetMatrixUniform(ViewProjectionMatrix, VIEW_PROJECTION_UNIFORM_NAME);
+	m_drawShader.SetMatrixUniform(ViewProjectionMatrix, ViewProjectionUniformName);
 
 	// Set it so that the gpu always uses the same particle Location for the whole instance
 	glVertexAttribDivisor(ParticleData::PositionLocation, advanceOncePerInstance);

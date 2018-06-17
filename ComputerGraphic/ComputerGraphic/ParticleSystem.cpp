@@ -155,6 +155,11 @@ void ParticleSystem::AddParticles(const ParticleData* particles, int numberOfPar
 
 void ParticleSystem::Update(float DeltaSeconds)
 {
+	if (m_numMeshVertices == 0)
+	{
+		return;
+	}
+
 #if 1
 	m_vao.Bind();
 	GetReadBuffer().Bind();
@@ -212,6 +217,11 @@ void ParticleSystem::Update(float DeltaSeconds)
 
 void ParticleSystem::Draw(const glm::mat4& ViewProjectionMatrix)
 {
+	if (m_numMeshVertices == 0)
+	{
+		return;
+	}
+
 	const glm::mat4 identityMat = glm::mat4();
 	m_vao.Bind();
 

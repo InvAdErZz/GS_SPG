@@ -34,6 +34,7 @@ void main(){
 		geo_out.wsPos = tese_in[i].wsPos;
 		geo_out.uv = tese_in[i].uv;
 		geo_out.normal = normal;
+		gl_Position = viewProjection * vec4(geo_out.wsPos, 1);
 		EmitVertex();
 	}
 	

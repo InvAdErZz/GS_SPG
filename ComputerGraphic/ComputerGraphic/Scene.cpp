@@ -1003,12 +1003,14 @@ void Scene::RenderScenePass()
 
 	m_rockShaderProgram.UnuseProgram();
 
+	m_terrain.Draw(viewProjection, m_spotlight.data(), m_spotlight.size());
+
+
 	for (auto& ps : m_particleSystem)
 	{
 		ps.Draw(viewProjection);
 	}
 
-	m_terrain.Draw(viewProjection, m_spotlight.data(), m_spotlight.size());
 
 	DrawLines();
 

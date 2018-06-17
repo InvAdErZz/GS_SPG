@@ -6,20 +6,26 @@ uniform vec3 terrainNormal;
 uniform vec3 terrainTangent;
 uniform vec3 terrainBitangent;
 
-const vec2 normalizedPos[4] = vec2[]
+const vec2 normalizedPos[6] = vec2[]
 (
   vec2( 1.0, 1.0),
   vec2(-1.0, 1.0),
   vec2( 1.0,-1.0),
-  vec2(-1.0,-1.0)
+  vec2(-1.0,-1.0),
+  
+   vec2( 1.0,-1.0),
+   vec2(-1.0, 1.0)
 );
 
-const vec2 uvCoords[4] = vec2[]
+const vec2 uvCoords[6] = vec2[]
 (
   vec2( 1.0, 1.0),
   vec2( 0.0, 1.0),
   vec2( 1.0, 0.0),
-  vec2( 0.0, 0.0)
+  vec2( 0.0, 0.0),
+  
+  vec2( 1.0, 0.0),
+  vec2( 0.0, 1.0)  
 );
 
 out VS_OUT

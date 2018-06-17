@@ -110,11 +110,11 @@ void Terrain::Draw(const glm::mat4& viewProjectionMatrix, const SpotLight* light
 	m_heightmap.BindToTextureUnit(heightMapTextureUnit);
 	m_terrainShaderProgram.SetSamplerTextureUnit(heightMapTextureUnit, HeightmapUniformName);
 
-	glPatchParameteri(GL_PATCH_VERTICES, quadVertices);
+	glPatchParameteri(GL_PATCH_VERTICES, 3);
 	m_emptyVao.Bind();
 
 	glDisable(GL_CULL_FACE);
-	glDrawArrays(GL_PATCHES, 0, quadVertices);
+	glDrawArrays(GL_PATCHES, 0, 6);
 	glEnable(GL_CULL_FACE);
 
 	m_emptyVao.Unbind();

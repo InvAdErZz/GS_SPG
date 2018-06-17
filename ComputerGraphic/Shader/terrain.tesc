@@ -1,6 +1,6 @@
 #version 400
 
-layout(vertices = 3) out;
+layout(vertices = 4) out;
 
 uniform float innerTessLevel;
 uniform float outerTessLevel;

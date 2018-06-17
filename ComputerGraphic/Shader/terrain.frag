@@ -8,6 +8,7 @@ uniform bool isLightActive[maxLights];
 uniform vec3 lightPos[maxLights];
 uniform vec3 cameraPos;
 uniform float ambient = 0.2;
+uniform sampler2D colortexture;
 
 in GEO_OUT
 {
@@ -40,5 +41,5 @@ void main(void) {
 		}
 	}
 	
-	color = vec3(1.f, 0.f, 0.f) * (totalLight);
+	color = texture(colortexture, geo_in.uv).rgb * (totalLight);
 }

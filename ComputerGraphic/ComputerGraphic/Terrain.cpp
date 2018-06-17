@@ -19,6 +19,8 @@ namespace
 	const std::string HeightmapUniformName = "heightMap";
 	const std::string MaxHeightUniformName = "maxHeight";
 
+	const std::string TextureUniformName = "colortexture";
+
 	const std::string TessLevelUniformName = "tesselationLevel";
 
 	const std::string InnerTessLevelUniformName = "innerTessLevel";
@@ -38,7 +40,7 @@ namespace
 }
 
 
-void Terrain::Init(glm::vec2 halfExtent, glm::vec3 center, float maxHeight, const char* heightmapFilePath)
+void Terrain::Init(glm::vec2 halfExtent, glm::vec3 center, float maxHeight, const char* heightmapFilePath, const char* texturePath)
 {
 	m_halfExtent = halfExtent;
 	m_center = center;
@@ -66,7 +68,8 @@ void Terrain::Init(glm::vec2 halfExtent, glm::vec3 center, float maxHeight, cons
 		InnerTessLevelUniformName,
 		OuterTessLevelUniformName,
 		ViewProjectionUniformName,
-		TessLevelUniformName
+		TessLevelUniformName,
+		TextureUniformName
 		});
 
 	for (size_t i = 0; i < LightPosUniformNameArray.size(); ++i)
@@ -74,16 +77,31 @@ void Terrain::Init(glm::vec2 halfExtent, glm::vec3 center, float maxHeight, cons
 		m_terrainShaderProgram.FindUniform(LightPosUniformNameArray[i]);
 	}
 
-	Image image;
-	image.LoadImage(heightmapFilePath);
-	assert(image.GetNumberChannels() == 3);
+	{
+		Image image;
+		image.LoadImage(heightmapFilePath);
+		assert(image.GetNumberChannels() == 3);
 
-	m_heightmap.Create();
-	m_heightmap.Bind();
-	m_heightmap.TextureImage(0, GL_RGB, image.GetWidth(), image.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, image.GetData());
-	m_heightmap.SetLinearFiltering();
-	m_heightmap.SetRepeating();
-	m_heightmap.Unbind();
+		m_heightmap.Create();
+		m_heightmap.Bind();
+		m_heightmap.TextureImage(0, GL_RGB, image.GetWidth(), image.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, image.GetData());
+		m_heightmap.SetLinearFiltering();
+		m_heightmap.SetRepeating();
+		m_heightmap.Unbind();
+	}
+
+	{
+		Image image;
+		image.LoadImage(texturePath);
+		assert(image.GetNumberChannels() == 3);
+
+		m_texture.Create();
+		m_texture.Bind();
+		m_texture.TextureImage(0, GL_RGB, image.GetWidth(), image.GetHeight(), GL_RGB, GL_UNSIGNED_BYTE, image.GetData());
+		m_texture.SetLinearFiltering();
+		m_texture.SetRepeating();
+		m_texture.Unbind();
+	}
 
 	m_emptyVao.Create();
 	m_quality = .1f;
@@ -116,6 +134,10 @@ void Terrain::Draw(const glm::mat4& viewProjectionMatrix, const SpotLight* light
 	constexpr int heightMapTextureUnit = 0;
 	m_heightmap.BindToTextureUnit(heightMapTextureUnit);
 	m_terrainShaderProgram.SetSamplerTextureUnit(heightMapTextureUnit, HeightmapUniformName);
+
+	constexpr int textureTextureUnit = heightMapTextureUnit + 1;
+	m_texture.BindToTextureUnit(textureTextureUnit);
+	m_terrainShaderProgram.SetSamplerTextureUnit(textureTextureUnit, TextureUniformName);
 
 	glPatchParameteri(GL_PATCH_VERTICES, quadVertices);
 	m_emptyVao.Bind();

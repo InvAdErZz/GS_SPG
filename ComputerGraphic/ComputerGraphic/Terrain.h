@@ -9,7 +9,7 @@ class SpotLight;
 class Terrain
 {
 public:
-	void Init(glm::vec2 dimension, glm::vec3 center, float maxHeight, const char* heightmapFilePath);
+	void Init(glm::vec2 dimension, glm::vec3 center, float maxHeight, const char* heightmapFilePath, const char* texturePath);
 
 	void Draw(const glm::mat4& viewProjectionMatrix, const SpotLight* lightPos, int lightCount);
 
@@ -26,6 +26,8 @@ public:
 	float m_quality;
 
 	Texture m_heightmap;
+	Texture m_texture;
+
 
 	VertexArray m_emptyVao;
 };

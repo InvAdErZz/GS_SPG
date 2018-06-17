@@ -18,6 +18,10 @@ enum class KeyCode
 	KEY_F,
 	KEY_G,
 	KEY_H,
+	KEY_N,
+	KEY_M,
+	KEY_V,
+	KEY_B,
 	KEY_R,
 	KEY_U,
 	KEY_I,
@@ -26,8 +30,6 @@ enum class KeyCode
 	KEY_T,
 	KEY_X,
 	KEY_Y,
-	KEY_N,
-	KEY_M,
 	KEY_LEFT_SHIFT,
 	KEY_1,
 	KEY_2,
@@ -42,6 +44,7 @@ enum class KeyCode
 	KEY_SPACE,
 	PLUS,
 	MINUS,
+	KEY_COMMA,
 	ENUM_SIZE
 };
 

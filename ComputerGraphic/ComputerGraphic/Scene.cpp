@@ -446,6 +446,25 @@ void Scene::Update(float deltaTime, const InputManager& inputManager)
 		ps.Update(deltaTime * m_particleUpdateRateModifier);
 	}
 
+	if (inputManager.GetKey(KeyCode::KEY_COMMA).GetNumPressed() > 0)
+	{
+		m_useWireframe = !m_useWireframe;
+		printf("wireframe is now %s \n", m_useWireframe ? "active" : "inactive");
+	}
+	
+
+	if (inputManager.GetKey(KeyCode::KEY_B).GetNumPressed() > 0)
+	{
+		m_terrain.m_maxHeight *= 1.3f;
+		printf("terrain max height is now: %f\n", m_terrain.m_maxHeight);
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_V).GetNumPressed() > 0)
+	{
+		m_terrain.m_maxHeight /= 1.3f;
+		printf("terrain max height is now: %f\n", m_terrain.m_maxHeight);
+	}
+
 	if (inputManager.GetKey(KeyCode::KEY_N).GetNumPressed() > 0)
 	{
 		m_terrain.m_quality *= 2.f;
@@ -871,6 +890,11 @@ void Scene::EsmShadowMapPass()
 
 void Scene::RenderScenePass()
 {
+	if (m_useWireframe)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+
 	if (m_allowedSampleSizes[m_sampleIndex] > 1)
 	{
 		m_msaaFrameBuffer.Bind();
@@ -1036,6 +1060,11 @@ void Scene::RenderScenePass()
 
 	m_msaaFrameBuffer.Unbind();
 	m_framebuffer.Unbind();
+
+	if (m_useWireframe)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 }
 
 void Scene::PostProcessPass()

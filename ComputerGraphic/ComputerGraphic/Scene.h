@@ -107,6 +107,7 @@ private:
 	int m_sampleIndex = 0;
 	float m_rockBaseDensity = 0.f;
 	float m_particleUpdateRateModifier = 1.f;
+	bool m_useWireframe = false;
 
 	int m_numParticlesToSpawn = 20;
 	int m_dispLayers = 2;

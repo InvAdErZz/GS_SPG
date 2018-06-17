@@ -29,6 +29,10 @@ namespace
 			return KeyCode::KEY_L;
 		case SDLK_k:
 			return KeyCode::KEY_K;
+		case SDLK_n:
+			return KeyCode::KEY_N;
+		case SDLK_m:
+			return KeyCode::KEY_M;
 		case SDLK_r:
 			return KeyCode::KEY_R;
 		case SDLK_u:

@@ -12,7 +12,6 @@ public:
 	void Init(glm::vec2 dimension, glm::vec3 center, float maxHeight, const char* heightmapFilePath);
 
 	void Draw(const glm::mat4& viewProjectionMatrix, const SpotLight* lightPos, int lightCount);
-private:
 
 	ShaderProgram m_terrainShaderProgram;
 
@@ -24,6 +23,7 @@ private:
 	glm::vec3 m_terrainBitangent;
 
 	float m_maxHeight;
+	float m_quality;
 
 	Texture m_heightmap;
 

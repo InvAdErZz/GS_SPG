@@ -36,7 +36,7 @@ void main(void) {
 			specular = pow(specular, 20);
 			
 			float AllLightComponents = diffuse + specular;
-			totalLight += AllLightComponents;			
+			totalLight += AllLightComponents * 0.4;			
 		}
 	}
 	

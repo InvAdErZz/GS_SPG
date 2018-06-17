@@ -19,6 +19,8 @@ namespace
 	const std::string HeightmapUniformName = "heightMap";
 	const std::string MaxHeightUniformName = "maxHeight";
 
+	const std::string TessLevelUniformName = "tesselationLevel";
+
 	const std::string InnerTessLevelUniformName = "innerTessLevel";
 	const std::string OuterTessLevelUniformName = "outerTessLevel";
 
@@ -63,7 +65,8 @@ void Terrain::Init(glm::vec2 halfExtent, glm::vec3 center, float maxHeight, cons
 		MaxHeightUniformName,
 		InnerTessLevelUniformName,
 		OuterTessLevelUniformName,
-		ViewProjectionUniformName
+		ViewProjectionUniformName,
+		TessLevelUniformName
 		});
 
 	for (size_t i = 0; i < LightPosUniformNameArray.size(); ++i)
@@ -83,14 +86,18 @@ void Terrain::Init(glm::vec2 halfExtent, glm::vec3 center, float maxHeight, cons
 	m_heightmap.Unbind();
 
 	m_emptyVao.Create();
+	m_quality = .1f;
 }
 
 void Terrain::Draw(const glm::mat4& viewProjectionMatrix, const SpotLight* lightPos, int lightCount)
 {
 	m_terrainShaderProgram.UseProgram();
 	m_terrainShaderProgram.SetFloatUniform(m_maxHeight, MaxHeightUniformName);
-	m_terrainShaderProgram.SetFloatUniform(m_halfExtent.x, InnerTessLevelUniformName);
-	m_terrainShaderProgram.SetFloatUniform(m_halfExtent.x, OuterTessLevelUniformName);
+
+	m_terrainShaderProgram.SetVec2Uniform(m_halfExtent * 2.f * m_quality, TessLevelUniformName);
+
+	//m_terrainShaderProgram.SetFloatUniform(m_halfExtent.x, InnerTessLevelUniformName);
+	//m_terrainShaderProgram.SetFloatUniform(m_halfExtent.x, OuterTessLevelUniformName);
 
 	m_terrainShaderProgram.SetVec3Uniform(m_terrainNormal, TerrainNormalUniformName);
 	m_terrainShaderProgram.SetVec3Uniform(m_terrainBitangent, TerrainBitangentUniformName);

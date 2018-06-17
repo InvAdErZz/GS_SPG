@@ -439,12 +439,27 @@ void Scene::Update(float deltaTime, const InputManager& inputManager)
 {
 	if (m_printFramerate)
 	{
-		printf("framerate is now: %f\n",  60.f / deltaTime);
+		printf("framerate is now: %f\n",  1.f / deltaTime);
 	}
 	for (auto& ps : m_particleSystem)
 	{
 		ps.Update(deltaTime * m_particleUpdateRateModifier);
 	}
+
+	if (inputManager.GetKey(KeyCode::KEY_N).GetNumPressed() > 0)
+	{
+		m_terrain.m_quality *= 2.f;
+		printf("terrain quality is now: %f\n", m_terrain.m_quality);
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_M).GetNumPressed() > 0)
+	{
+		m_terrain.m_quality = m_terrain.m_quality / 2.f;
+		printf("terrain quality is now: %f\n", m_terrain.m_quality);
+	}
+
+	if (inputManager.GetKey(KeyCode::KEY_T).GetNumPressed() > 0)
+
 
 	if (inputManager.GetKey(KeyCode::KEY_T).GetNumPressed() > 0)
 	{

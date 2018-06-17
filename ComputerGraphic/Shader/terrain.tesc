@@ -5,6 +5,8 @@ layout(vertices = 4) out;
 uniform float innerTessLevel;
 uniform float outerTessLevel;
 
+uniform vec2 tesselationLevel;
+
 in VS_OUT
 {
 	vec3 wsPos;
@@ -22,11 +24,11 @@ void main(){
 	tesc_out[gl_InvocationID].uv = vs_in[gl_InvocationID].uv;
 
     if(gl_InvocationID == 0) {
-        gl_TessLevelInner[0] = innerTessLevel;
-        gl_TessLevelInner[1] = innerTessLevel;
-        gl_TessLevelOuter[0] = outerTessLevel;
-        gl_TessLevelOuter[1] = outerTessLevel;
-        gl_TessLevelOuter[2] = outerTessLevel;
-        gl_TessLevelOuter[3] = outerTessLevel;
+        gl_TessLevelInner[0] = tesselationLevel.x;
+        gl_TessLevelInner[1] = tesselationLevel.y;
+        gl_TessLevelOuter[0] = tesselationLevel.x;
+        gl_TessLevelOuter[1] = tesselationLevel.y;
+        gl_TessLevelOuter[2] = tesselationLevel.x;
+        gl_TessLevelOuter[3] = tesselationLevel.y;
     }
 }

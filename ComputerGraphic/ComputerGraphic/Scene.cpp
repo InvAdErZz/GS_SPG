@@ -346,7 +346,7 @@ void Scene::Init(const glm::ivec2& ViewPort)
 	m_mcLookup.WriteLookupTablesToGpu();
 	m_rock.Init();
 	m_rock.GenerateMesh(m_mcLookup,0.f);
-	//m_rock.GeneratedKdTree(rockModelMat);
+	m_rock.GeneratedKdTree(rockModelMat);
 
 	{
 		m_particleSystem[0].Init(
@@ -1110,7 +1110,7 @@ void Scene::RayTraceAndSpawnParticles(glm::vec2 mousePos)
 
 	m_linesToDrawInWorldSpace.clear();
 	const auto edgeLines = m_rock.m_kdTree.rootNode()->boundingBox.getEdgeLines();
-	m_linesToDrawInWorldSpace.insert(m_linesToDrawInWorldSpace.begin(), edgeLines.begin(), edgeLines.end());
+	//m_linesToDrawInWorldSpace.insert(m_linesToDrawInWorldSpace.begin(), edgeLines.begin(), edgeLines.end());
 	m_linesToDrawInWorldSpace.push_back(m_camera.m_position);
 	m_linesToDrawInWorldSpace.push_back(m_camera.m_position + length * direction);
 }

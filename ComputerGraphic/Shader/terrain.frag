@@ -27,18 +27,15 @@ void main(void) {
 	
 	for(int i = 0; i < maxLights; ++i)
 	{
-		//if(isLightActive[i])
-		{		
-			vec3 lightDir = normalize(lightPos[0] - geo_in.wsPos);
-			vec3 reflectDir = reflect(lightDir, normal);
-			
-			float diffuse = max(0,dot(normal, lightDir));
-			float specular = max(0,dot(viewDir, reflectDir));
-			specular = pow(specular, 20);
-			
-			float AllLightComponents = diffuse + specular;
-			totalLight += AllLightComponents * 0.4;			
-		}
+		vec3 lightDir = normalize(lightPos[0] - geo_in.wsPos);
+		vec3 reflectDir = reflect(lightDir, normal);
+		
+		float diffuse = max(0,dot(normal, lightDir));
+		float specular = max(0,dot(viewDir, reflectDir));
+		specular = pow(specular, 20);
+		
+		float AllLightComponents = diffuse + specular;
+		totalLight += AllLightComponents * 0.4;			
 	}
 	
 	color = texture(colortexture, geo_in.uv).rgb * (totalLight);
